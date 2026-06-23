@@ -1,0 +1,56 @@
+---
+title: Feedback
+description: "Record 👍/👎, scores, comments, and corrections against a generation."
+---
+
+`@bryel/feedback` records user feedback against a generation or session — the
+substrate for evals and fine-tuning datasets. Server-side, zero dependencies.
+
+```bash
+npm i @bryel/feedback
+```
+
+## Record feedback
+
+```ts
+import { recordFeedback, thumbsUp } from "@bryel/feedback";
+
+await recordFeedback({
+  apiKey: process.env.BRYEL_KEY!,
+  target: { type: "message", id: messageId }, // or { type: "session", id: sessionId }
+  kind: "thumb",      // thumb | score | comment | correction | label
+  score: 1,           // 👍=1 / 👎=0, or a scalar
+  userId,             // → annotator
+  source: "end_user", // end_user | labeler | model_judge | code
+});
+
+// shorthands
+await thumbsUp({ apiKey, target: { type: "message", id: messageId } });
+```
+
+## The messageId handshake
+
+Feedback arrives *after* the answer, so the client needs a handle that also
+exists on the trace. Mint a `messageId` per turn, pass it into telemetry
+`metadata` (bryel stamps it as `bryel.interaction.id`), and return it to the
+client:
+
+<Steps>
+  <Step title="Server: mint + stamp + return">
+    ```ts
+    const messageId = crypto.randomUUID();
+    streamText({ /* … */ experimental_telemetry: { isEnabled: true, metadata: { sessionId, userId, messageId } } });
+    return result.toTextStreamResponse({ headers: { "x-bryel-message-id": messageId } });
+    ```
+  </Step>
+  <Step title="Client: hold the id, send the score">
+    The browser keeps `messageId` (from the header) and POSTs a 👍/👎 to your backend.
+  </Step>
+  <Step title="Backend: proxy to bryel">
+    ```ts
+    await recordFeedback({ apiKey: process.env.BRYEL_KEY!, target: { type: "message", id: messageId }, kind: "thumb", score: 1, userId, source: "end_user" });
+    ```
+  </Step>
+</Steps>
+
+<Warning>Keep your API key **server-side** — proxy browser clicks through your backend; never ship the key to the client.</Warning>

@@ -1,0 +1,36 @@
+---
+title: "OpenAI · Anthropic · LangChain"
+description: "Trace popular SDKs via OpenInference instrumentors + bryel."
+---
+
+These SDKs don't need a bryel-specific adapter — instrument them with the
+community **[OpenInference](https://github.com/Arize-ai/openinference)**
+instrumentor, then ship the spans with [`bryelSpanProcessor`](/frameworks/opentelemetry).
+
+<Steps>
+  <Step title="Install">
+    ```bash
+    npm i @bryel/sdk-core @opentelemetry/sdk-node
+    # + the OpenInference instrumentor for your library, e.g.
+    npm i @arizeai/openinference-instrumentation-openai
+    ```
+  </Step>
+  <Step title="Wire it up">
+    ```ts
+    import { NodeSDK } from "@opentelemetry/sdk-node";
+    import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
+    import { bryelSpanProcessor } from "@bryel/sdk-core";
+
+    new NodeSDK({
+      instrumentations: [new OpenAIInstrumentation()],
+      spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+    }).start();
+    ```
+  </Step>
+  <Step title="Use your SDK normally">
+    Your OpenAI / Anthropic / LangChain calls are now traced to bryel — no
+    call-site changes.
+  </Step>
+</Steps>
+
+<Note>OpenInference instrumentors exist for OpenAI, Anthropic, LangChain, LlamaIndex, and more. Any of them works with `bryelSpanProcessor`.</Note>

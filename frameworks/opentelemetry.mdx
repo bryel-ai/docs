@@ -1,0 +1,57 @@
+---
+title: Any OpenTelemetry app
+description: "Ship to bryel from any OpenTelemetry-instrumented app."
+---
+
+bryel is OpenTelemetry-native. If your app already emits **OpenInference** spans
+— via an instrumentor or your own instrumentation — add the bryel processor and
+you're done. No framework lock-in.
+
+```bash
+npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+
+## Add the processor
+
+`bryelSpanProcessor` batches and ships spans to bryel without any mapping:
+
+<CodeGroup>
+```ts @vercel/otel
+import { registerOTel } from "@vercel/otel";
+import { bryelSpanProcessor } from "@bryel/sdk-core";
+
+registerOTel({
+  serviceName: "my-app",
+  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+});
+```
+```ts NodeSDK
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { bryelSpanProcessor } from "@bryel/sdk-core";
+
+new NodeSDK({
+  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+}).start();
+```
+</CodeGroup>
+
+That's it — spans batch and POST to the bryel ingest with `Authorization: Bearer <key>`.
+
+## Custom mapping
+
+If your spans aren't OpenInference yet, supply a `SpanMapper` (this is exactly
+what `@bryel/vercel` does for the AI SDK):
+
+```ts
+import { buildSpanProcessor, type SpanMapper } from "@bryel/sdk-core";
+
+const myMapper: SpanMapper = {
+  name: "my-framework",
+  shouldMap: (span) => span.name.startsWith("my."),
+  map: (span) => ({ /* OpenInference attributes to merge */ }),
+};
+
+const processor = buildSpanProcessor(myMapper, { apiKey: process.env.BRYEL_KEY });
+```
+
+See [`@bryel/semconv`](/api-reference/semconv) for the convention constants.

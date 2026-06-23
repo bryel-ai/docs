@@ -1,0 +1,33 @@
+---
+title: Concepts
+description: "How bryel models agent runs: traces, interactions, and sessions."
+---
+
+bryel is **agent-first**. Three units structure everything you see.
+
+<CardGroup cols={3}>
+  <Card title="Trace" icon="diagram-project">
+    One **agent run** (turn) — the root span plus all its model steps and tool calls.
+  </Card>
+  <Card title="Interaction" icon="message">
+    The **turn** itself — one user → agent exchange, summarized.
+  </Card>
+  <Card title="Session" icon="comments">
+    A **conversation** — multiple turns grouped by `sessionId`.
+  </Card>
+</CardGroup>
+
+## Grouping keys
+
+| Key | Set via | Purpose |
+| --- | --- | --- |
+| `sessionId` | telemetry `metadata.sessionId` | groups turns into a conversation |
+| `userId` | telemetry `metadata.userId` | the end-user behind the run |
+| `messageId` | telemetry `metadata.messageId` | a per-turn handle; stamped as `bryel.interaction.id` so [feedback](/guides/feedback) joins to the turn |
+
+## Tokens & cost
+
+Token counts live on the **leaf model spans** (the actual provider request); the
+outer operation span repeats them as a roll-up. bryel sums tokens and cost over
+the whole trace and prices them at ingest — so you see cost per turn, per
+session, and per project.

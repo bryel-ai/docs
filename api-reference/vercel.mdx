@@ -1,0 +1,29 @@
+---
+title: "@bryel/vercel"
+description: "Vercel AI SDK adapter."
+---
+
+```bash
+npm i @bryel/vercel @vercel/otel
+```
+
+## bryelVercelProcessor
+
+```ts
+bryelVercelProcessor(options): SpanProcessor
+```
+
+A span processor that maps the Vercel AI SDK's OpenTelemetry spans into
+OpenInference and ships them to bryel. Pass it to `registerOTel`'s
+`spanProcessors`. See the [Vercel guide](/frameworks/vercel).
+
+## Options
+
+<ParamField path="apiKey" type="string" required>Project API key (`bk_…`).</ParamField>
+<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">Override for self-hosting.</ParamField>
+<ParamField path="headers" type="Record<string, string>">Extra headers, merged after auth.</ParamField>
+
+## Telemetry metadata
+
+Set per `streamText` / `generateText` call via `experimental_telemetry.metadata`:
+`sessionId`, `userId`, and a `messageId` you mint for [feedback](/guides/feedback).

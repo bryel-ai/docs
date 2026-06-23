@@ -1,72 +1,32 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
-  "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
-  },
+  "name": "bryel",
+  "description": "LLM & agent observability — OpenTelemetry-native tracing SDK.",
+  "colors": { "primary": "#8c90d9", "light": "#a8abe8", "dark": "#6b6fcf" },
   "favicon": "/favicon.svg",
+  "logo": { "light": "/logo/light.svg", "dark": "/logo/dark.svg" },
   "navigation": {
-    "pages": [
+    "tabs": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
+        "tab": "Documentation",
+        "groups": [
+          { "group": "Get started", "pages": ["introduction", "quickstart", "installation"] },
+          { "group": "Frameworks", "pages": ["frameworks/vercel", "frameworks/opentelemetry", "frameworks/other"] },
+          { "group": "Guides", "pages": ["guides/concepts", "guides/feedback"] }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "groups": [
+          { "group": "Packages", "pages": ["api-reference/sdk-core", "api-reference/vercel", "api-reference/feedback", "api-reference/semconv"] }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
     ]
   },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
-  }
+  "navbar": {
+    "links": [{ "label": "GitHub", "href": "https://github.com/bryel-ai" }],
+    "primary": { "type": "button", "label": "Dashboard", "href": "https://bryel.ai" }
+  },
+  "footer": { "socials": { "github": "https://github.com/bryel-ai", "x": "https://x.com/bryel_ai" } }
 }

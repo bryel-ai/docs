@@ -1,0 +1,27 @@
+---
+title: "@bryel/semconv"
+description: "OpenInference conventions + bryel extensions."
+---
+
+```bash
+npm i @bryel/semconv
+```
+
+OpenInference-conformant semantic-convention constants with no `@arizeai`
+dependency. Install directly only if you write a custom [`SpanMapper`](/api-reference/sdk-core#spanmapper).
+
+```ts
+import {
+  SemanticConventions,    // OpenInference attribute keys (LLM_MODEL_NAME, INPUT_VALUE, …)
+  OpenInferenceSpanKind,  // LLM | TOOL | CHAIN | AGENT | …
+  BryelConventions,       // bryel extensions (INTERACTION_ID, COST_USD, REASONING, …)
+  MimeType,               // JSON | TEXT
+} from "@bryel/semconv";
+```
+
+| Constant | What |
+| --- | --- |
+| `SemanticConventions` | OpenInference attribute keys |
+| `OpenInferenceSpanKind` | span-kind enum |
+| `BryelConventions` | bryel-specific keys, e.g. `INTERACTION_ID` (`bryel.interaction.id`) |
+| `MimeType` | input/output mime types |

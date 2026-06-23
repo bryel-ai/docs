@@ -1,0 +1,42 @@
+---
+title: Installation
+description: "Install the bryel SDK packages for your stack."
+---
+
+The SDK is modular and published under the `@bryel` scope. It ships **both ESM
+and CommonJS**, so `import` and `require` both work, in Node and bundlers.
+
+<CodeGroup>
+```bash npm
+npm i @bryel/sdk-core          # any OTel app
+npm i @bryel/vercel            # + Vercel AI SDK
+npm i @bryel/feedback          # user feedback
+```
+```bash pnpm
+pnpm add @bryel/sdk-core
+pnpm add @bryel/vercel
+pnpm add @bryel/feedback
+```
+```bash yarn
+yarn add @bryel/sdk-core
+yarn add @bryel/vercel
+yarn add @bryel/feedback
+```
+</CodeGroup>
+
+## Configuration
+
+Every processor takes the same options:
+
+<ParamField path="apiKey" type="string" required>
+  Your project API key (`bk_…`). The receiver stamps tenant/project from the
+  key — the SDK never sends them.
+</ParamField>
+<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">
+  Override to point at your own ingest (self-hosting).
+</ParamField>
+<ParamField path="headers" type="Record<string, string>">
+  Extra headers, merged after the auth header.
+</ParamField>
+
+<Note>Keep your API key server-side. For browser feedback, proxy through your backend — see [Feedback](/guides/feedback).</Note>
