@@ -6,13 +6,13 @@ description: "How bryel models agent runs: traces, interactions, and sessions."
 bryel is **agent-first**. Three units structure everything you see.
 
 <CardGroup cols={3}>
-  <Card title="Trace" icon="diagram-project">
+  <Card title="Trace" icon="workflow">
     One **agent run** (turn) — the root span plus all its model steps and tool calls.
   </Card>
-  <Card title="Interaction" icon="message">
+  <Card title="Interaction" icon="message-square">
     The **turn** itself — one user → agent exchange, summarized.
   </Card>
-  <Card title="Session" icon="comments">
+  <Card title="Session" icon="messages-square">
     A **conversation** — multiple turns grouped by `sessionId`.
   </Card>
 </CardGroup>
@@ -25,9 +25,29 @@ bryel is **agent-first**. Three units structure everything you see.
 | `userId` | telemetry `metadata.userId` | the end-user behind the run |
 | `messageId` | telemetry `metadata.messageId` | a per-turn handle; stamped as `bryel.interaction.id` so [feedback](/guides/feedback) joins to the turn |
 
+## Span kinds
+
+Every span carries an **OpenInference span kind** (`openinference.span.kind`) so
+bryel knows what it is. The adapters set this for you; a custom
+[`SpanMapper`](/api-reference/sdk-core#spanmapper) sets it from
+[`OpenInferenceSpanKind`](/api-reference/semconv).
+
+| Kind | What it represents |
+| --- | --- |
+| `LLM` | A model generation — `generateText` / `streamText` / a provider request |
+| `TOOL` | A tool / function call inside a run |
+| `CHAIN` | A composite step that wraps other spans (e.g. an agent loop) |
+| `AGENT` | An agent run |
+| `RETRIEVER` · `EMBEDDING` · `RERANKER` | Retrieval-augmented steps |
+| `GUARDRAIL` · `EVALUATOR` | Safety checks and scoring steps |
+
 ## Tokens & cost
 
 Token counts live on the **leaf model spans** (the actual provider request); the
 outer operation span repeats them as a roll-up. bryel sums tokens and cost over
-the whole trace and prices them at ingest — so you see cost per turn, per
+the whole trace and **prices them at ingest** — so you see cost per turn, per
 session, and per project.
+
+Pricing is recorded as `bryel.cost.usd` with a `bryel.cost.status`
+(`provider_reported`, `priced`, `unknown_model`, or `no_tokens`) so you always
+know whether a number is exact, estimated, or unavailable.
