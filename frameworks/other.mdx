@@ -1,36 +1,49 @@
 ---
 title: "OpenAI · Anthropic · LangChain"
-description: "Trace popular SDKs via OpenInference instrumentors + bryel."
+description: "Trace direct provider SDKs by shipping their OpenTelemetry spans to bryel."
 ---
 
-These SDKs don't need a bryel-specific adapter — instrument them with the
-community **[OpenInference](https://github.com/Arize-ai/openinference)**
-instrumentor, then ship the spans with [`bryelSpanProcessor`](/frameworks/opentelemetry).
+bryel is **OpenTelemetry-native**: anything that emits OpenTelemetry GenAI spans
+ships to bryel as-is — no bryel-specific adapter required.
 
-<Steps>
-  <Step title="Install">
-    ```bash
-    npm i @bryel/sdk-core @opentelemetry/sdk-node
-    # + the OpenInference instrumentor for your library, e.g.
-    npm i @arizeai/openinference-instrumentation-openai
-    ```
-  </Step>
-  <Step title="Wire it up">
-    ```ts
-    import { NodeSDK } from "@opentelemetry/sdk-node";
-    import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
-    import { bryelSpanProcessor } from "@bryel/sdk-core";
+## Recommended: go through the Vercel AI SDK
 
-    new NodeSDK({
-      instrumentations: [new OpenAIInstrumentation()],
-      spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
-    }).start();
-    ```
-  </Step>
-  <Step title="Use your SDK normally">
-    Your OpenAI / Anthropic / LangChain calls are now traced to bryel — no
-    call-site changes.
-  </Step>
-</Steps>
+The Vercel AI SDK wraps OpenAI, Anthropic, Google, and dozens of other providers
+behind one interface, and bryel has a first-class adapter for it. If you can call
+your model through the AI SDK, it's the least-effort, best-instrumented path —
+models, tokens, cost, and the full tool trajectory, out of the box.
 
-<Note>OpenInference instrumentors exist for OpenAI, Anthropic, LangChain, LlamaIndex, and more. Any of them works with `bryelSpanProcessor`.</Note>
+```bash
+npm i @bryel/vercel @vercel/otel
+```
+
+See the [Vercel AI SDK guide](/frameworks/vercel).
+
+## Calling a provider SDK directly
+
+If you call the OpenAI / Anthropic / LangChain SDKs directly, add any
+OpenTelemetry instrumentation that emits GenAI spans, then ship those spans with
+[`bryelSpanProcessor`](/frameworks/opentelemetry) — it forwards OTel spans to
+bryel without modifying them:
+
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { bryelSpanProcessor } from "@bryel/sdk-core";
+// import the OpenTelemetry instrumentation for your provider SDK
+
+new NodeSDK({
+  instrumentations: [
+    /* your GenAI instrumentation here */
+  ],
+  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+}).start();
+```
+
+Your provider calls now flow to bryel — no call-site changes.
+
+<Note>
+  bryel speaks the **OpenInference** convention over OTLP and
+  [owns its conventions outright](/api-reference/semconv) — there's no
+  third-party observability SDK in your dependency tree. Any instrumentation that
+  emits OpenInference- or OTel-GenAI-shaped spans works.
+</Note>
