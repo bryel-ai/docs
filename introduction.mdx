@@ -29,13 +29,6 @@ The SDK is, at its core, an **OTLP exporter + a span processor**. Any
 OpenTelemetry app can use it; adapters (like the Vercel one) add framework-aware
 mapping on top.
 
-```mermaid
-flowchart LR
-  A[Your app] -->|OTel spans| B[bryel span processor]
-  B -->|OpenInference / OTLP| C[(bryel ingest)]
-  C --> D[Traces · sessions · cost · feedback]
-```
-
 ## Packages
 
 | Package | Install for |
