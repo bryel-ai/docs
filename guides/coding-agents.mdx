@@ -1,0 +1,101 @@
+---
+title: Query from your coding agent
+description: "Connect bryel to Claude Code, Cursor, or any MCP client and query your traces with BQL."
+---
+
+bryel runs a remote **MCP server** so your coding agent can query your own trace
+data — runs, intents, tokens, cost, tool trajectories — with BQL, right from your
+editor. It's OAuth-gated and read-only.
+
+## Connect
+
+<Steps>
+  <Step title="Add the MCP server">
+    <CodeGroup>
+    ```bash Claude Code
+    claude mcp add --transport http bryel https://mcp.bryel.ai/api/mcp
+    ```
+    ```json Cursor (~/.cursor/mcp.json)
+    {
+      "mcpServers": {
+        "bryel": { "url": "https://mcp.bryel.ai/api/mcp" }
+      }
+    }
+    ```
+    ```json VS Code (.vscode/mcp.json)
+    {
+      "servers": {
+        "bryel": { "type": "http", "url": "https://mcp.bryel.ai/api/mcp" }
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Authorize">
+    The first time your agent uses it, a browser opens — sign in to bryel and
+    **pick the project** the agent may query. That project is bound to the
+    connection; it's the only one this agent can ever see.
+  </Step>
+  <Step title="Ask away">
+    Your agent now has three tools. Try:
+    _"Using bryel, how many traces errored in the last 7 days, and which intents cost the most?"_
+  </Step>
+</Steps>
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `bryel_schema` | Lists the queryable fields, types and operators, plus your project's **live** intent labels and model names. Call this first. |
+| `bryel_validate` | Checks a BQL filter for errors (with did-you-mean suggestions) **without running it**. |
+| `bryel_query` | Runs a BQL filter and returns the match count + a sample (model, status, tokens, cost, steps, tools, truncated input). |
+
+Everything is **read-only** and scoped to the single project you picked at
+consent — the agent can't name another project.
+
+## BQL in 30 seconds
+
+BQL is a filter expression over your traces. Strings use single quotes; combine
+with `and` / `or` / `not`.
+
+```
+status = 'error'
+intent = 'add_pricing' and cost_usd > 0.5
+tool_count >= 10 and repeated_calls > 0
+model = 'anthropic/claude-opus-4-7'
+```
+
+Call `bryel_schema` to see every field, operator, and your project's actual
+intent labels + model names.
+
+## Give your agent the playbook
+
+Paste this into your `AGENTS.md` / `CLAUDE.md` (or `.cursorrules`) so the agent
+uses bryel well:
+
+````markdown
+## Querying bryel (observability)
+
+You have bryel MCP tools to query THIS project's LLM/agent traces:
+
+- `bryel_schema` — call FIRST to learn the fields, operators, and the project's
+  real intent labels + model names.
+- `bryel_validate` — check a BQL filter before running it.
+- `bryel_query` — run a BQL filter; returns a match count + sample rows.
+
+BQL is a filter expression (single-quoted strings; combine with and / or / not):
+  status = 'error'
+  intent = 'add_pricing' and cost_usd > 0.5
+  tool_count >= 10 and repeated_calls > 0
+
+Use it to investigate error rates, cost/token outliers, which intents are
+expensive, repeated/looping tool calls, and slow runs. Always ground on
+`bryel_schema` before writing a query, and `bryel_validate` if unsure.
+````
+
+<Note>
+  One connection = one project (chosen at consent), read-only. To query a
+  different project, add a second MCP connection and pick that project. Removing
+  the connection (or losing access to the project) cuts off the agent
+  immediately.
+</Note>

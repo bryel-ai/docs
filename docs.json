@@ -47,7 +47,7 @@
         "groups": [
           { "group": "Get started", "pages": ["introduction", "quickstart", "installation"] },
           { "group": "Frameworks", "pages": ["frameworks/vercel", "frameworks/opentelemetry", "frameworks/other"] },
-          { "group": "Guides", "pages": ["guides/concepts", "guides/feedback"] }
+          { "group": "Guides", "pages": ["guides/concepts", "guides/feedback", "guides/coding-agents"] }
         ]
       },
       {
