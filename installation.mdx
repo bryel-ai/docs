@@ -8,19 +8,24 @@ and CommonJS**, so `import` and `require` both work, in Node and bundlers.
 
 <CodeGroup>
 ```bash npm
-npm i @bryel/sdk-core          # any OTel app
-npm i @bryel/vercel            # + Vercel AI SDK
-npm i @bryel/feedback          # user feedback
+npm i @bryel/sdk-core @opentelemetry/sdk-trace-base   # any OTel app
+npm i @bryel/vercel @vercel/otel                      # + Vercel AI SDK
+npm i @bryel/feedback                                 # user feedback
 ```
 ```bash pnpm
-pnpm add @bryel/sdk-core
-pnpm add @bryel/vercel
+pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
+pnpm add @bryel/vercel @vercel/otel
 pnpm add @bryel/feedback
 ```
 ```bash yarn
-yarn add @bryel/sdk-core
-yarn add @bryel/vercel
+yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
+yarn add @bryel/vercel @vercel/otel
 yarn add @bryel/feedback
+```
+```bash bun
+bun add @bryel/sdk-core @opentelemetry/sdk-trace-base
+bun add @bryel/vercel @vercel/otel
+bun add @bryel/feedback
 ```
 </CodeGroup>
 
