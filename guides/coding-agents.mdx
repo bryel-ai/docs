@@ -41,7 +41,7 @@ bryel runs a remote MCP server so your coding agent can work with your own data:
 
 ## Tools
 
-Seven tools, scoped to the single project you picked at consent. The agent can never name another project.
+Eight tools, scoped to the single project you picked at consent. The agent can never name another project.
 
 ### Traces
 
@@ -58,6 +58,7 @@ Seven tools, scoped to the single project you picked at consent. The agent can n
 | `bryel_list_datasets` | Lists this project's fine-tune (SFT) datasets with record counts. |
 | `bryel_inspect_dataset` | A full training-data quality report for one dataset (see below). |
 | `bryel_create_dataset` <sup>write</sup> | Creates a new empty dataset; returns its slug. |
+| `bryel_add_from_query` <sup>write</sup> | Curates real traces into a dataset — every trace matching a BQL filter becomes a record. |
 | `bryel_add_records` <sup>write</sup> | Appends records in the bryel fine-tune shape (`{messages, tools?}`). |
 
 The two **write** tools require **Allow write** at consent; otherwise they return a clear "read-only" error telling you to reconnect.
@@ -106,7 +107,16 @@ fix before fine-tuning."
 
 ## Building a dataset
 
-With write enabled, an agent can assemble a fine-tune set without leaving the editor. Each record is a chat-with-tools trajectory in the bryel shape:
+With write enabled, an agent builds a fine-tune set without leaving the editor. The usual path curates your **real runs** — find good traces, then add the ones matching a filter:
+
+```
+"Using bryel: create a dataset 'good-add-pricing', then add every clean
+add_pricing run from the last 30 days to it, and inspect the result."
+```
+
+That maps to `bryel_create_dataset` → `bryel_add_from_query` (e.g. `intent = 'add_pricing' and status = 'ok'`) → `bryel_inspect_dataset`. Adding from a query is idempotent per trace, so you can widen the filter and re-run without duplicating.
+
+To add records from outside bryel instead, `bryel_add_records` takes the chat-with-tools shape directly:
 
 ```json
 {
@@ -150,13 +160,16 @@ Datasets (SFT fine-tune sets):
   redundancy + duplicate clusters, trajectory health (looping/errored), token &
   step length (+ truncation risk), model mix.
 - `bryel_create_dataset` (write) — make a new empty dataset; returns its slug.
-- `bryel_add_records` (write) — append records as {messages, tools?}; `input`
-  is derived from the first user turn if omitted; ≤500 per call.
+- `bryel_add_from_query` (write) — add every trace matching a BQL filter to a
+  dataset as a record (idempotent per trace). The main way to build a set from
+  real runs: create_dataset -> add_from_query -> inspect_dataset.
+- `bryel_add_records` (write) — append external records as {messages, tools?};
+  `input` is derived from the first user turn if omitted; ≤500 per call.
 
 Use traces to investigate error rates, cost/token outliers, expensive intents,
 repeated/looping tool calls, and slow runs. Use the dataset tools to judge a
-fine-tune set's quality (balance, dedup, health, length) and to build one.
-Always ground on `bryel_get_schema` before writing a query.
+fine-tune set's quality (balance, dedup, health, length) and to build one from
+your real runs. Always ground on `bryel_get_schema` before writing a query.
 ````
 
 <Note>
