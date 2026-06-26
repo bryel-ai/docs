@@ -1,7 +1,11 @@
 ---
 title: "@bryel/vercel"
-description: "Vercel AI SDK adapter."
+description: "Vercel AI SDK adapter that maps OpenTelemetry spans to OpenInference and ships them to bryel."
 ---
+
+The Vercel AI SDK adapter. It maps the AI SDK's OpenTelemetry spans into OpenInference and ships them to bryel. For end-to-end setup, see the [Vercel guide](/frameworks/vercel).
+
+## Install
 
 ```bash
 npm i @bryel/vercel @vercel/otel
@@ -13,17 +17,63 @@ npm i @bryel/vercel @vercel/otel
 bryelVercelProcessor(options): SpanProcessor
 ```
 
-A span processor that maps the Vercel AI SDK's OpenTelemetry spans into
-OpenInference and ships them to bryel. Pass it to `registerOTel`'s
-`spanProcessors`. See the [Vercel guide](/frameworks/vercel).
+Returns a `SpanProcessor` that maps Vercel AI SDK spans into OpenInference and exports them to bryel. Pass it to `registerOTel`'s `spanProcessors`.
 
-## Options
+```ts instrumentation.ts
+import { registerOTel } from "@vercel/otel";
+import { bryelVercelProcessor } from "@bryel/vercel";
 
-<ParamField path="apiKey" type="string" required>Project API key (`bk_…`).</ParamField>
-<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">Override for self-hosting.</ParamField>
-<ParamField path="headers" type="Record<string, string>">Extra headers, merged after auth.</ParamField>
+export function register() {
+  registerOTel({
+    serviceName: "my-app",
+    spanProcessors: [
+      bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! }),
+    ],
+  });
+}
+```
+
+### Options
+
+<ParamField path="apiKey" type="string" required>
+  Project API key (`bk_…`). Resolves to your project and tenant server-side.
+</ParamField>
+
+<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">
+  OTLP/HTTP traces endpoint. Override for self-hosting.
+</ParamField>
+
+<ParamField path="headers" type="Record<string, string>">
+  Extra headers, merged after the auth header.
+</ParamField>
 
 ## Telemetry metadata
 
-Set per `streamText` / `generateText` call via `experimental_telemetry.metadata`:
-`sessionId`, `userId`, and a `messageId` you mint for [feedback](/guides/feedback).
+Enable telemetry per call and attach metadata through `experimental_telemetry`:
+
+```ts
+await generateText({
+  model: openai("gpt-4o"),
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: { sessionId, userId },
+  },
+  prompt,
+});
+```
+
+<Note>You set `isEnabled: true` yourself per call — the adapter does not inject it.</Note>
+
+The following `metadata` fields are recognized:
+
+<ParamField path="sessionId" type="string">
+  Groups calls into a single conversation.
+</ParamField>
+
+<ParamField path="userId" type="string">
+  Associates the call with an end user.
+</ParamField>
+
+<ParamField path="messageId" type="string">
+  A `messageId` you mint, used to attach [feedback](/guides/feedback).
+</ParamField>

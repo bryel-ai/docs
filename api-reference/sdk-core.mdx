@@ -1,11 +1,39 @@
 ---
 title: "@bryel/sdk-core"
-description: "Framework-agnostic core: OTLP exporter + span processors."
+description: "Framework-agnostic OTLP exporter and span processors for any OpenTelemetry app."
 ---
 
-```bash
+The framework-agnostic core. Ship OpenInference/OTel spans to bryel, with or without a mapping step.
+
+<CodeGroup>
+
+```bash npm
 npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
 ```
+
+```bash pnpm
+pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+
+```bash yarn
+yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+
+</CodeGroup>
+
+## Exports
+
+<CardGroup cols={3}>
+  <Card title="bryelSpanProcessor" icon="package" href="#bryelspanprocessor">
+    Ship spans as-is.
+  </Card>
+  <Card title="buildSpanProcessor" icon="git-merge" href="#buildspanprocessor">
+    Map, then ship.
+  </Card>
+  <Card title="buildExporter" icon="send" href="#buildexporter">
+    The raw OTLP exporter.
+  </Card>
+</CardGroup>
 
 ## bryelSpanProcessor
 
@@ -13,9 +41,7 @@ npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
 bryelSpanProcessor(options): SpanProcessor
 ```
 
-A batching span processor that ships spans to bryel **without mapping** — for any
-app already emitting OpenInference/OTel spans. Add it to your provider's
-`spanProcessors`.
+A batching span processor that ships spans to bryel **without mapping** — for any app already emitting OpenInference/OTel spans. Add it to your provider's `spanProcessors`.
 
 ## buildSpanProcessor
 
@@ -23,8 +49,7 @@ app already emitting OpenInference/OTel spans. Add it to your provider's
 buildSpanProcessor(mapper: SpanMapper, options): SpanProcessor
 ```
 
-Like `bryelSpanProcessor`, but runs a `SpanMapper` first — promote framework
-spans into OpenInference before export.
+Like `bryelSpanProcessor`, but runs a [`SpanMapper`](#spanmapper) first to promote framework spans into OpenInference before export.
 
 ## buildExporter
 
@@ -32,18 +57,44 @@ spans into OpenInference before export.
 buildExporter(options): SpanExporter
 ```
 
-The raw OTLP/HTTP-protobuf exporter pointed at the bryel ingest, with the API key
-on the `Authorization` header. Compose it yourself if you need a custom processor.
+The raw OTLP/HTTP-protobuf exporter, pointed at the bryel ingest with the API key on the `Authorization` header. Compose it yourself when you need a custom processor.
 
 ## Options
 
-<ParamField path="apiKey" type="string" required>Project API key (`bk_…`).</ParamField>
-<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">Override for self-hosting.</ParamField>
-<ParamField path="headers" type="Record<string, string>">Extra headers, merged after auth.</ParamField>
+Shared by `bryelSpanProcessor`, `buildSpanProcessor`, and `buildExporter`.
+
+<ParamField path="apiKey" type="string" required>
+  Project API key (`bk_…`).
+</ParamField>
+
+<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">
+  Override for self-hosting.
+</ParamField>
+
+<ParamField path="headers" type="Record<string, string>">
+  Extra headers, merged after auth.
+</ParamField>
 
 ## SpanMapper
 
-<ParamField path="name" type="string" required>Identifier for the mapper.</ParamField>
-<ParamField path="shouldMap" type="(span) => boolean" required>Skip spans this mapper doesn't own.</ParamField>
-<ParamField path="map" type="(span) => Attributes" required>OpenInference attributes to **merge** onto the span (does not mutate).</ParamField>
-<ParamField path="isTraceRoot" type="(span) => boolean">Optional. Marks an operation root whose framework parent is dropped, so runs root cleanly.</ParamField>
+Passed to [`buildSpanProcessor`](#buildspanprocessor) to promote framework spans into OpenInference.
+
+<ParamField path="name" type="string" required>
+  Identifier for the mapper.
+</ParamField>
+
+<ParamField path="shouldMap" type="(span) => boolean" required>
+  Skip spans this mapper doesn't own.
+</ParamField>
+
+<ParamField path="map" type="(span) => Attributes" required>
+  OpenInference attributes to **merge** onto the span (does not mutate).
+</ParamField>
+
+<ParamField path="isTraceRoot" type="(span) => boolean">
+  Optional. Marks an operation root whose framework parent is dropped, so runs root cleanly.
+</ParamField>
+
+<Note>
+  Building a Vercel AI SDK app? [`@bryel/vercel`](/api-reference/vercel) wraps these primitives with a ready-made mapper.
+</Note>

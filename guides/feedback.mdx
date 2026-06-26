@@ -1,16 +1,27 @@
 ---
 title: Feedback
-description: "Record 👍/👎, scores, comments, and corrections against a generation."
+description: "Record 👍/👎, scores, comments, and corrections against a generation with @bryel/feedback."
 ---
 
-`@bryel/feedback` records user feedback against a generation or session — the
-substrate for evals and fine-tuning datasets. Server-side, zero dependencies.
+Record user feedback against a generation or session — the substrate for evals and fine-tuning datasets. `@bryel/feedback` runs server-side with zero dependencies.
 
-```bash
+<CodeGroup>
+```bash npm
 npm i @bryel/feedback
 ```
 
+```bash pnpm
+pnpm add @bryel/feedback
+```
+
+```bash yarn
+yarn add @bryel/feedback
+```
+</CodeGroup>
+
 ## Record feedback
+
+Call `recordFeedback` with the target you're scoring and the kind of signal you captured.
 
 ```ts
 import { recordFeedback, thumbsUp } from "@bryel/feedback";
@@ -28,29 +39,30 @@ await recordFeedback({
 await thumbsUp({ apiKey, target: { type: "message", id: messageId } });
 ```
 
+See the [feedback API reference](/api-reference/feedback) for every field and shorthand.
+
 ## The messageId handshake
 
-Feedback arrives *after* the answer, so the client needs a handle that also
-exists on the trace. Mint a `messageId` per turn, pass it into telemetry
-`metadata` (bryel stamps it as `bryel.interaction.id`), and return it to the
-client:
+Feedback arrives _after_ the answer, so the client needs a handle that also exists on the trace. Mint a `messageId` per turn, pass it into telemetry `metadata` (bryel stamps it as `bryel.interaction.id`), and return it to the client.
 
 <Steps>
-  <Step title="Server: mint + stamp + return">
+  <Step title="Mint, stamp, and return on the server">
     ```ts
     const messageId = crypto.randomUUID();
     streamText({ /* … */ experimental_telemetry: { isEnabled: true, metadata: { sessionId, userId, messageId } } });
     return result.toTextStreamResponse({ headers: { "x-bryel-message-id": messageId } });
     ```
   </Step>
-  <Step title="Client: hold the id, send the score">
+  <Step title="Hold the id on the client">
     The browser keeps `messageId` (from the header) and POSTs a 👍/👎 to your backend.
   </Step>
-  <Step title="Backend: proxy to bryel">
+  <Step title="Proxy to bryel from your backend">
     ```ts
     await recordFeedback({ apiKey: process.env.BRYEL_KEY!, target: { type: "message", id: messageId }, kind: "thumb", score: 1, userId, source: "end_user" });
     ```
   </Step>
 </Steps>
 
-<Warning>Keep your API key **server-side** — proxy browser clicks through your backend; never ship the key to the client.</Warning>
+<Warning>Keep your API key server-side. Proxy browser clicks through your backend — never ship `BRYEL_KEY` to the client.</Warning>
+
+To capture the `messageId` upstream in the first place, see the [Vercel instrumentation](/frameworks/vercel) guide.

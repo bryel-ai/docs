@@ -1,10 +1,22 @@
 ---
 title: Installation
-description: "Install the bryel SDK packages for your stack."
+description: "Install the bryel SDK packages and set your API key."
 ---
 
-The SDK is modular and published under the `@bryel` scope. It ships **both ESM
-and CommonJS**, so `import` and `require` both work, in Node and bundlers.
+The SDK is modular and published under the `@bryel` scope. Every package ships ESM and CommonJS, so `import` and `require` both work across Node and bundlers.
+
+## Packages
+
+Install the entry package for your stack. Each one layers on top of `@bryel/sdk-core`.
+
+| Package | What it does | Reference |
+| --- | --- | --- |
+| `@bryel/sdk-core` | Base instrumentation for any OpenTelemetry app. | [sdk-core](/api-reference/sdk-core) |
+| `@bryel/vercel` | Capture spans from the Vercel AI SDK. | [vercel](/api-reference/vercel) |
+| `@bryel/feedback` | Record user feedback (👍/👎) on agent output. | [feedback](/api-reference/feedback) |
+| `@bryel/semconv` | Semantic convention constants for span attributes. | [semconv](/api-reference/semconv) |
+
+## Install
 
 <CodeGroup>
 ```bash npm
@@ -29,19 +41,50 @@ bun add @bryel/feedback
 ```
 </CodeGroup>
 
+### Peer dependencies
+
+Each package builds on OpenTelemetry primitives you install alongside it.
+
+<ParamField path="@bryel/sdk-core" type="@opentelemetry/sdk-trace-base">
+  The OTel trace SDK that the processor plugs into.
+</ParamField>
+<ParamField path="@bryel/vercel" type="@vercel/otel">
+  Vercel's OTel setup, which wires Vercel AI SDK spans through.
+</ParamField>
+
+## Set your API key
+
+Add your project API key (`bk_…`) so the SDK can authenticate to the receiver.
+
+```bash .env
+BRYEL_KEY=bk_...
+```
+
+The receiver stamps tenant and project from the key — the SDK never sends them.
+
+<Warning>Keep `BRYEL_KEY` server-side. For browser feedback, proxy through your backend — see [Feedback](/guides/feedback).</Warning>
+
 ## Configuration
 
-Every processor takes the same options:
+Every processor takes the same options.
 
 <ParamField path="apiKey" type="string" required>
-  Your project API key (`bk_…`). The receiver stamps tenant/project from the
-  key — the SDK never sends them.
+  Your project API key (`bk_…`), typically read from `BRYEL_KEY`.
 </ParamField>
 <ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">
-  Override to point at your own ingest (self-hosting).
+  Override to point at your own ingest when self-hosting.
 </ParamField>
 <ParamField path="headers" type="Record<string, string>">
   Extra headers, merged after the auth header.
 </ParamField>
 
-<Note>Keep your API key server-side. For browser feedback, proxy through your backend — see [Feedback](/guides/feedback).</Note>
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Wire up tracing and see your first spans.
+  </Card>
+  <Card title="Frameworks" icon="boxes" href="/frameworks/overview">
+    Instrument Vercel, OpenTelemetry, or anything else.
+  </Card>
+</CardGroup>

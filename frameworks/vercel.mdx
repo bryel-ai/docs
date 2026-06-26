@@ -1,57 +1,69 @@
 ---
 title: Vercel AI SDK
-description: "Trace the Vercel AI SDK with one processor and a per-call flag."
+description: "Trace the Vercel AI SDK with one span processor and a per-call flag."
 ---
 
-`@bryel/vercel` maps the Vercel AI SDK's OpenTelemetry spans into OpenInference
-and ships them to bryel — models, tokens, cost, tool calls, and the full
-multi-step trajectory. No wrapping your model calls.
+`@bryel/vercel` maps the Vercel AI SDK's OpenTelemetry spans into OpenInference and ships them to bryel — models, tokens, cost, tool calls, and the full multi-step trajectory. You never wrap your model calls.
 
-```bash
-npm i @bryel/vercel @vercel/otel
-```
+<Steps>
+  <Step title="Install">
+    Add the bryel processor and the Vercel OTel package.
 
-## 1. Register the processor once
+    ```bash
+    npm i @bryel/vercel @vercel/otel
+    ```
+  </Step>
 
-`instrumentation.ts` (Next.js calls this on startup):
+  <Step title="Register the processor once">
+    Add `bryelVercelProcessor` to `registerOTel` in `instrumentation.ts`. Next.js calls this on startup.
 
-```ts
-import { registerOTel } from "@vercel/otel";
-import { bryelVercelProcessor } from "@bryel/vercel";
+    ```ts instrumentation.ts
+    import { registerOTel } from "@vercel/otel";
+    import { bryelVercelProcessor } from "@bryel/vercel";
 
-export function register() {
-  registerOTel({
-    serviceName: "my-app",
-    spanProcessors: [bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! })],
-  });
-}
-```
+    export function register() {
+      registerOTel({
+        serviceName: "my-app",
+        spanProcessors: [bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! })],
+      });
+    }
+    ```
+  </Step>
 
-## 2. Enable telemetry per call
+  <Step title="Enable telemetry per call">
+    Set `experimental_telemetry.isEnabled` on each model call you want traced.
 
-```ts
-const result = streamText({
-  model: openai("gpt-5"),
-  prompt,
-  stopWhen: stepCountIs(10),
-  tools: { /* … */ },
-  experimental_telemetry: {
-    isEnabled: true,
-    metadata: { sessionId, userId },
-  },
-});
-```
+    ```ts
+    const result = streamText({
+      model: openai("gpt-5"),
+      prompt,
+      stopWhen: stepCountIs(10),
+      tools: { /* … */ },
+      experimental_telemetry: {
+        isEnabled: true,
+        metadata: { sessionId, userId },
+      },
+    });
+    ```
+  </Step>
 
-## Grouping & feedback
+  <Step title="Verify">
+    Run a call, then open the trace explorer. You see the model, tokens, cost, and tool calls for the run.
+  </Step>
+</Steps>
 
-The `metadata` you pass becomes how bryel groups and joins data:
+## Grouping and feedback
+
+The `metadata` you pass becomes how bryel groups and joins data.
 
 <ParamField path="sessionId" type="string">
   Groups multiple turns into one conversation.
 </ParamField>
+
 <ParamField path="userId" type="string">
   The end-user behind the run.
 </ParamField>
+
 <ParamField path="messageId" type="string">
   A per-turn id **you mint** (`crypto.randomUUID()`). bryel stamps it onto the
   spans as `bryel.interaction.id` so [feedback](/guides/feedback) joins back to
@@ -68,3 +80,5 @@ return result.toTextStreamResponse({ headers: { "x-bryel-message-id": messageId 
 ```
 
 <Warning>A streamed span finalizes only once the stream is fully consumed — always drain it.</Warning>
+
+For full processor options, see the [`@bryel/vercel` reference](/api-reference/vercel).

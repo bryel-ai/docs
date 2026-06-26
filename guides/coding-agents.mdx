@@ -1,13 +1,9 @@
 ---
-title: Use bryel from your coding agent
-description: "Connect bryel to Claude Code, Cursor, or any MCP client — query your traces with BQL, inspect dataset quality, and build fine-tune datasets from your editor."
+title: Coding agents
+description: "Connect Claude Code, Cursor, or any MCP client to bryel to query traces, inspect dataset quality, and build fine-tune datasets from your editor."
 ---
 
-bryel runs a remote **MCP server** so your coding agent can work with your own
-data — query trace runs (intents, tokens, cost, tool trajectories) with BQL,
-inspect a fine-tune dataset's quality, and build datasets — right from your
-editor. It's OAuth-gated, scoped to one project, and **read-only by default**
-(writing is opt-in at consent).
+bryel runs a remote MCP server so your coding agent can work with your own data: query trace runs with BQL, inspect a fine-tune dataset's quality, and build datasets without leaving the editor. It's OAuth-gated, scoped to one project, and read-only by default.
 
 ## Connect
 
@@ -34,34 +30,28 @@ editor. It's OAuth-gated, scoped to one project, and **read-only by default**
     </CodeGroup>
   </Step>
   <Step title="Authorize">
-    The first time your agent uses it, a browser opens — sign in to bryel and
-    **pick the project** the agent may use. That project is bound to the
-    connection; it's the only one this agent can ever see.
+    The first time your agent uses the server, a browser opens. Sign in to bryel and pick the project the agent may use. That project is bound to the connection; it's the only one this agent can ever see.
 
-    Leave **Allow write** off for read-only access (query + inspect). Turn it on
-    only if you want the agent to **create datasets and add records**.
+    Leave **Allow write** off for read-only access (query and inspect). Turn it on only if you want the agent to create datasets and add records.
   </Step>
   <Step title="Ask away">
-    Try:
-    _"Using bryel, how many traces errored in the last 7 days, and which intents cost the most?"_
-    or _"Inspect my `good-berlin-runs` dataset — is it balanced enough to fine-tune on?"_
+    Try _"Using bryel, how many traces errored in the last 7 days, and which intents cost the most?"_ or _"Inspect my `good-berlin-runs` dataset — is it balanced enough to fine-tune on?"_
   </Step>
 </Steps>
 
 ## Tools
 
-Seven tools, scoped to the single project you picked at consent — the agent can
-never name another project.
+Seven tools, scoped to the single project you picked at consent. The agent can never name another project.
 
-#### Traces
+### Traces
 
 | Tool | What it does |
 | --- | --- |
-| `bryel_get_schema` | Lists the queryable fields, types and operators, plus your project's **live** intent labels and model names. Call this first. |
+| `bryel_get_schema` | Lists the queryable fields, types, and operators, plus your project's **live** intent labels and model names. Call this first. |
 | `bryel_validate_query` | Checks a BQL filter for errors (with did-you-mean suggestions) **without running it**. |
-| `bryel_query_traces` | Runs a BQL filter and returns the match count + a sample (model, status, tokens, cost, steps, tools, truncated input). |
+| `bryel_query_traces` | Runs a BQL filter and returns the match count plus a sample (model, status, tokens, cost, steps, tools, truncated input). |
 
-#### Datasets
+### Datasets
 
 | Tool | What it does |
 | --- | --- |
@@ -70,13 +60,11 @@ never name another project.
 | `bryel_create_dataset` <sup>write</sup> | Creates a new empty dataset; returns its slug. |
 | `bryel_add_records` <sup>write</sup> | Appends records in the bryel fine-tune shape (`{messages, tools?}`). |
 
-The two **write** tools require that you enabled *Allow write* at consent;
-otherwise they return a clear "read-only" error telling you to reconnect.
+The two **write** tools require **Allow write** at consent; otherwise they return a clear "read-only" error telling you to reconnect.
 
 ## BQL in 30 seconds
 
-BQL is a filter expression over your traces. Strings use single quotes; combine
-with `and` / `or` / `not`.
+BQL is a filter expression over your traces. Strings use single quotes; combine clauses with `and`, `or`, and `not`.
 
 ```
 status = 'error'
@@ -85,23 +73,31 @@ tool_count >= 10 and repeated_calls > 0
 model = 'anthropic/claude-opus-4-7'
 ```
 
-Call `bryel_get_schema` to see every field, operator, and your project's actual
-intent labels + model names.
+Call `bryel_get_schema` to see every field, operator, and your project's actual intent labels and model names. See [Concepts](/concepts) for what a trace and intent are.
 
 ## Inspecting dataset quality
 
-`bryel_inspect_dataset` returns the same metrics bryel uses to judge whether a
-dataset will train a good model — so your agent can curate before you export:
+`bryel_inspect_dataset` returns the same metrics bryel uses to judge whether a dataset will train a good model, so your agent can curate before you export.
 
-- **intents** — distribution per intent, top share, and an `imbalanced` flag
-  (one intent dominating → the fine-tune overfits it).
-- **redundancy** — unique vs duplicate inputs and the largest duplicate
-  clusters (near-identical records waste capacity).
-- **trajectoryHealth** — clean vs `looping` / `errored` trajectories, overall
-  and per intent (errored/looping runs teach the model bad behavior).
-- **length** — token and step distributions, with a count of records at risk of
-  truncating at the fine-tune context limit.
-- **modelMix** — which source models the records came from.
+<ParamField path="intents" type="report">
+  Distribution per intent, top share, and an `imbalanced` flag (one intent dominating means the fine-tune overfits it).
+</ParamField>
+
+<ParamField path="redundancy" type="report">
+  Unique vs duplicate inputs and the largest duplicate clusters (near-identical records waste capacity).
+</ParamField>
+
+<ParamField path="trajectoryHealth" type="report">
+  Clean vs `looping` / `errored` trajectories, overall and per intent (errored or looping runs teach the model bad behavior).
+</ParamField>
+
+<ParamField path="length" type="report">
+  Token and step distributions, with a count of records at risk of truncating at the fine-tune context limit.
+</ParamField>
+
+<ParamField path="modelMix" type="report">
+  Which source models the records came from.
+</ParamField>
 
 ```
 "Using bryel, list my datasets, inspect the largest one, and tell me what to
@@ -110,8 +106,7 @@ fix before fine-tuning."
 
 ## Building a dataset
 
-With write enabled, an agent can assemble a fine-tune set without leaving the
-editor. Records use the bryel shape — a chat-with-tools trajectory per record:
+With write enabled, an agent can assemble a fine-tune set without leaving the editor. Each record is a chat-with-tools trajectory in the bryel shape:
 
 ```json
 {
@@ -124,8 +119,7 @@ editor. Records use the bryel shape — a chat-with-tools trajectory per record:
 }
 ```
 
-`input` (the readable prompt) is derived from the first user message when you
-omit it. Add up to 500 records per `bryel_add_records` call.
+`input` (the readable prompt) is derived from the first user message when you omit it. Add up to 500 records per `bryel_add_records` call.
 
 ```
 "Create a bryel dataset 'good-berlin-runs', then add these trajectories to it."
@@ -133,8 +127,7 @@ omit it. Add up to 500 records per `bryel_add_records` call.
 
 ## Give your agent the playbook
 
-Paste this into your `AGENTS.md` / `CLAUDE.md` (or `.cursorrules`) so the agent
-uses bryel well:
+Paste this into your `AGENTS.md` / `CLAUDE.md` (or `.cursorrules`) so the agent uses bryel well.
 
 ````markdown
 ## Using bryel (observability + fine-tune datasets)
@@ -167,8 +160,5 @@ Always ground on `bryel_get_schema` before writing a query.
 ````
 
 <Note>
-  One connection = one project (chosen at consent). It's read-only unless you
-  turned on **Allow write**. To use a different project — or to change the
-  read/write choice — reconnect and re-consent. Removing the connection (or
-  losing access to the project) cuts off the agent immediately.
+  One connection equals one project, chosen at consent, and read-only unless you turned on **Allow write**. To use a different project — or to change the read/write choice — reconnect and re-consent. Removing the connection (or losing access to the project) cuts off the agent immediately.
 </Note>

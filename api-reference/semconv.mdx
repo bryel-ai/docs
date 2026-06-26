@@ -1,14 +1,15 @@
 ---
 title: "@bryel/semconv"
-description: "OpenInference conventions + bryel extensions."
+description: "OpenInference semantic-convention constants plus bryel extensions, with no @arizeai dependency."
 ---
+
+OpenInference-conformant semantic-convention constants with no `@arizeai` dependency. Install it directly only when you write a custom [`SpanMapper`](/api-reference/sdk-core#spanmapper).
 
 ```bash
 npm i @bryel/semconv
 ```
 
-OpenInference-conformant semantic-convention constants with no `@arizeai`
-dependency. Install directly only if you write a custom [`SpanMapper`](/api-reference/sdk-core#spanmapper).
+Each export is a frozen object of string constants paired with a matching TypeScript type. Use them as attribute keys when building a mapper.
 
 ```ts
 import {
@@ -19,12 +20,9 @@ import {
 } from "@bryel/semconv";
 ```
 
-Each export is a frozen object of string constants (plus matching TypeScript
-types). Use them as attribute keys when building a mapper.
-
 ## SemanticConventions
 
-OpenInference attribute keys. The full set, pinned to the OpenInference spec:
+OpenInference attribute keys, pinned to the OpenInference spec.
 
 | Constant | Value |
 | --- | --- |
@@ -48,12 +46,13 @@ OpenInference attribute keys. The full set, pinned to the OpenInference spec:
 
 ## OpenInferenceSpanKind
 
-`openinference.span.kind` values: `CHAIN`, `LLM`, `TOOL`, `RETRIEVER`,
-`EMBEDDING`, `AGENT`, `RERANKER`, `GUARDRAIL`, `EVALUATOR`.
+Values for `openinference.span.kind`:
+
+`CHAIN` · `LLM` · `TOOL` · `RETRIEVER` · `EMBEDDING` · `AGENT` · `RERANKER` · `GUARDRAIL` · `EVALUATOR`
 
 ## BryelConventions
 
-bryel-owned `bryel.*` extensions, beyond the OpenInference spec:
+bryel-owned `bryel.*` extensions, beyond the OpenInference spec.
 
 | Constant | Value |
 | --- | --- |
@@ -67,5 +66,9 @@ bryel-owned `bryel.*` extensions, beyond the OpenInference spec:
 
 ## MimeType
 
-`TEXT` (`text/plain`) · `JSON` (`application/json`) — used for
-`input.mime_type` / `output.mime_type`.
+Used for `input.mime_type` and `output.mime_type`.
+
+| Constant | Value |
+| --- | --- |
+| `TEXT` | `text/plain` |
+| `JSON` | `application/json` |

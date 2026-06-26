@@ -1,39 +1,40 @@
 ---
-title: Introduction
-description: "OpenTelemetry-native tracing for LLM apps and agents — ship to bryel from any framework."
+title: bryel
+description: "OpenTelemetry-native observability for LLM apps and agents — ship traces from any framework to bryel."
 ---
 
-**bryel** is observability for LLM apps and agents. The SDK is OpenTelemetry-native:
-it ships your model calls, tool calls, tokens, and cost to bryel as
-OpenInference traces — from **any**
-framework, not just one.
+bryel is OpenTelemetry-native observability for LLM apps and agents. The SDK ships your model calls, tool calls, tokens, and cost to bryel as OpenInference traces — from any framework, not just one.
+
+## Start here
 
 <CardGroup cols={2}>
-  <Card title="Vercel AI SDK" icon="zap" href="/frameworks/vercel">
-    One processor + a per-call flag. No wrapping your model calls.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Send your first trace in a few minutes.
   </Card>
-  <Card title="Any OpenTelemetry app" icon="workflow" href="/frameworks/opentelemetry">
-    Already emit OpenInference spans? Add one processor and you're done.
+  <Card title="Installation" icon="package" href="/installation">
+    Pick the right package and wire up the SDK.
   </Card>
-  <Card title="OpenAI · Anthropic · LangChain" icon="layers" href="/frameworks/other">
-    Use an OpenInference instrumentor + the bryel processor.
+  <Card title="Concepts" icon="book-open" href="/concepts">
+    Traces, intents, feedback, and datasets.
   </Card>
-  <Card title="User feedback" icon="thumbs-up" href="/guides/feedback">
-    Record 👍/👎, scores, and corrections against a generation.
+  <Card title="Coding agents" icon="bot" href="/guides/coding-agents">
+    Connect a coding agent over the remote MCP.
   </Card>
 </CardGroup>
 
-## How it works
+## What you get
 
-The SDK is, at its core, an **OTLP exporter + a span processor**. Any
-OpenTelemetry app can use it; adapters (like the Vercel one) add framework-aware
-mapping on top.
-
-## Packages
-
-| Package | Install for |
-| --- | --- |
-| [`@bryel/sdk-core`](/api-reference/sdk-core) | Any OpenTelemetry / OpenInference app |
-| [`@bryel/vercel`](/api-reference/vercel) | The Vercel AI SDK |
-| [`@bryel/feedback`](/api-reference/feedback) | Recording user feedback |
-| [`@bryel/semconv`](/api-reference/semconv) | Conventions for custom mappers |
+<CardGroup cols={2}>
+  <Card title="Any framework via OTel" icon="workflow">
+    An OTLP exporter and span processor at the core. Use the Vercel AI SDK adapter, an OpenInference instrumentor, or your own OpenTelemetry spans.
+  </Card>
+  <Card title="Traces to intents to feedback" icon="layers">
+    Capture full agent runs, then attach 👍/👎, scores, and corrections to any generation.
+  </Card>
+  <Card title="Datasets from production" icon="database">
+    Turn real traces and feedback into datasets you can curate and reuse.
+  </Card>
+  <Card title="Remote MCP for coding agents" icon="bot">
+    Give coding agents direct access to your traces through a remote MCP server.
+  </Card>
+</CardGroup>

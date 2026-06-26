@@ -1,46 +1,56 @@
 ---
-title: Any OpenTelemetry app
-description: "Ship to bryel from any OpenTelemetry-instrumented app."
+title: OpenTelemetry
+description: "Add the bryel span processor to any OpenTelemetry-instrumented app."
 ---
 
-bryel is OpenTelemetry-native. If your app already emits **OpenInference** spans
-— via an instrumentor or your own instrumentation — add the bryel processor and
-you're done. No framework lock-in.
+bryel is OpenTelemetry-native. If your app already emits [OpenInference](/concepts) spans, point the bryel processor at your tracer provider and you're done. No framework lock-in.
 
-```bash
-npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
-```
+<Steps>
+  <Step title="Install">
+    Add the SDK alongside your existing OpenTelemetry packages.
 
-## Add the processor
+    ```bash
+    npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
+    ```
+  </Step>
 
-`bryelSpanProcessor` batches and ships spans to bryel without any mapping:
+  <Step title="Register the processor">
+    `bryelSpanProcessor` batches and ships spans to bryel with no mapping. Register it on your tracer provider.
 
-<CodeGroup>
-```ts @vercel/otel
-import { registerOTel } from "@vercel/otel";
-import { bryelSpanProcessor } from "@bryel/sdk-core";
+    <CodeGroup>
+    ```ts @vercel/otel
+    import { registerOTel } from "@vercel/otel";
+    import { bryelSpanProcessor } from "@bryel/sdk-core";
 
-registerOTel({
-  serviceName: "my-app",
-  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
-});
-```
-```ts NodeSDK
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { bryelSpanProcessor } from "@bryel/sdk-core";
+    registerOTel({
+      serviceName: "my-app",
+      spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+    });
+    ```
 
-new NodeSDK({
-  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
-}).start();
-```
-</CodeGroup>
+    ```ts NodeSDK
+    import { NodeSDK } from "@opentelemetry/sdk-node";
+    import { bryelSpanProcessor } from "@bryel/sdk-core";
 
-That's it — spans batch and POST to the bryel ingest with `Authorization: Bearer <key>`.
+    new NodeSDK({
+      spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+    }).start();
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Set your key">
+    Spans batch and POST to bryel ingest with `Authorization: Bearer <key>`. Set `BRYEL_KEY` in your environment.
+
+    ```bash
+    BRYEL_KEY=...
+    ```
+  </Step>
+</Steps>
 
 ## Custom mapping
 
-If your spans aren't OpenInference yet, supply a `SpanMapper` (this is exactly
-what `@bryel/vercel` does for the AI SDK):
+If your spans aren't OpenInference yet, supply a `SpanMapper`. This is exactly what `@bryel/vercel` does for the AI SDK.
 
 ```ts
 import { buildSpanProcessor, type SpanMapper } from "@bryel/sdk-core";
@@ -54,4 +64,17 @@ const myMapper: SpanMapper = {
 const processor = buildSpanProcessor(myMapper, { apiKey: process.env.BRYEL_KEY });
 ```
 
-See [`@bryel/semconv`](/api-reference/semconv) for the convention constants.
+<Tip>
+  See [`@bryel/semconv`](/api-reference/semconv) for the convention constants.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Vercel AI SDK" icon="triangle" href="/frameworks/vercel">
+    Use the prebuilt mapper instead of wiring your own.
+  </Card>
+  <Card title="Other frameworks" icon="boxes" href="/frameworks/other">
+    Patterns for instrumenting anything else.
+  </Card>
+</CardGroup>

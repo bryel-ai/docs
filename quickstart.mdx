@@ -1,15 +1,20 @@
 ---
 title: Quickstart
-description: "Get your first trace into bryel in a couple of minutes."
+description: "Instrument an app, send a trace, and see it in bryel in under five minutes."
 ---
+
+Instrument an app, send a trace, and view the run in the dashboard.
 
 <Steps>
   <Step title="Get an API key">
-    Create a project in the [bryel dashboard](https://bryel.ai) and copy its API
-    key (`bk_…`). Set it as `BRYEL_KEY`.
+    Create a project in the [bryel dashboard](https://bryel.ai) and copy its API key (`bk_…`). Set it as `BRYEL_KEY` in your environment.
+
+    ```bash
+    export BRYEL_KEY=bk_...
+    ```
   </Step>
   <Step title="Install the SDK">
-    Pick the package for your stack:
+    Pick the package for your stack.
 
     <CodeGroup>
     ```bash Vercel AI SDK
@@ -21,21 +26,32 @@ description: "Get your first trace into bryel in a couple of minutes."
     </CodeGroup>
   </Step>
   <Step title="Register the processor">
-    For the **Vercel AI SDK** (`instrumentation.ts`):
+    Add the bryel span processor where you set up OpenTelemetry.
 
-    ```ts
-    import { registerOTel } from "@vercel/otel";
-    import { bryelVercelProcessor } from "@bryel/vercel";
+    <Tabs>
+      <Tab title="Vercel AI SDK">
+        In `instrumentation.ts`:
 
-    export function register() {
-      registerOTel({
-        serviceName: "my-app",
-        spanProcessors: [bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! })],
-      });
-    }
-    ```
+        ```ts
+        import { registerOTel } from "@vercel/otel";
+        import { bryelVercelProcessor } from "@bryel/vercel";
+
+        export function register() {
+          registerOTel({
+            serviceName: "my-app",
+            spanProcessors: [bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! })],
+          });
+        }
+        ```
+      </Tab>
+      <Tab title="Any OTel app">
+        Wire the core processor into your tracer setup. See [Any OpenTelemetry app](/frameworks/opentelemetry) for the full configuration.
+      </Tab>
+    </Tabs>
   </Step>
   <Step title="Enable telemetry per call">
+    Turn on `experimental_telemetry` for each generation you want traced.
+
     ```ts
     const result = streamText({
       model: openai("gpt-5"),
@@ -48,11 +64,19 @@ description: "Get your first trace into bryel in a couple of minutes."
     ```
   </Step>
   <Step title="See it in bryel">
-    Run your app, then open the dashboard — you'll see the run: streamed turns,
-    tool calls, tokens, and cost.
+    Run your app, then open the dashboard. You'll see the run: streamed turns, tool calls, tokens, and cost.
 
     <Tip>A streamed span finalizes only once the stream is fully consumed — always drain it.</Tip>
   </Step>
 </Steps>
 
-Not on Vercel? See [Any OpenTelemetry app](/frameworks/opentelemetry).
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Instrumentation" icon="plug" href="/frameworks/overview">
+    Set up bryel for your framework — Vercel AI SDK, OpenTelemetry, or anything else.
+  </Card>
+  <Card title="Concepts" icon="book-open" href="/concepts">
+    Understand traces, sessions, and turns, and how bryel models an agent run.
+  </Card>
+</CardGroup>
