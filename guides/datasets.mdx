@@ -1,0 +1,72 @@
+---
+title: Datasets
+description: "Curate production traces into supervised fine-tuning (SFT) datasets, judge their quality, and export them for training."
+---
+
+A dataset is a curated set of records for **supervised fine-tuning**. Each record is one agent run, reconstructed into a chat-with-tools trajectory (`{messages, tools}`) — the training target. There's no separate "expected" answer: SFT learns from the trajectory itself.
+
+## Build a dataset
+
+Datasets are built from your real runs. Create one, then add the traces worth training on.
+
+<Tabs>
+  <Tab title="In the app">
+    <Steps>
+      <Step title="Create a dataset">
+        From **Datasets**, give it a name. Empty to start.
+      </Step>
+      <Step title="Add traces">
+        Use the trace selector to filter your runs (by intent, status, cost, tools, and more), preview the matches, and add them. Each trace is reconstructed into a record with its full message + tool trajectory.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="From a coding agent">
+    With the [remote MCP](/guides/coding-agents) and write access, an agent builds a set from your editor:
+
+    ```
+    "Using bryel: create a dataset 'good-add-pricing', add every clean
+    add_pricing run from the last 30 days, and inspect the result."
+    ```
+
+    That runs `bryel_create_dataset` → `bryel_add_from_query` → `bryel_inspect_dataset`. Adding from a query is idempotent per trace, so you can widen the filter and re-run without duplicating.
+  </Tab>
+</Tabs>
+
+## Judge quality before you train
+
+A fine-tune is only as good as its data. bryel surfaces the dimensions that make or break an SFT set — in the dataset view and through `bryel_inspect_dataset`.
+
+<ParamField path="Balance" type="intent distribution">
+  How records spread across intents. One intent dominating makes the model overfit it and forget the rest.
+</ParamField>
+
+<ParamField path="Redundancy" type="duplicate clusters">
+  Near-identical inputs waste capacity and bias the model. bryel groups them so you can prune to a few exemplars.
+</ParamField>
+
+<ParamField path="Trajectory health" type="looping / errored">
+  Runs that looped or errored teach the model bad behavior. They're flagged so you can drop or repair them.
+</ParamField>
+
+<ParamField path="Length" type="token & step distribution">
+  Records that exceed the fine-tune context window get truncated mid-trajectory; trivially short ones add no signal.
+</ParamField>
+
+In the dataset view you can filter to **duplicates** or **problematic** records and prune them in place.
+
+## Export for training
+
+Export a dataset to fine-tune **JSONL** — one `{messages, tools}` object per line, ready for a training run.
+
+<Steps>
+  <Step title="Export JSONL">
+    From the dataset, choose **Export JSONL**. bryel streams the records to a file you can download.
+  </Step>
+  <Step title="Train">
+    Feed the JSONL to your fine-tuning pipeline.
+  </Step>
+</Steps>
+
+<Card title="Build datasets from your editor" icon="bot" href="/guides/coding-agents" horizontal>
+  Connect a coding agent over the remote MCP to query, curate, and inspect datasets.
+</Card>

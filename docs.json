@@ -48,7 +48,7 @@
           { "group": "Get started", "pages": ["introduction", "quickstart", "installation"] },
           { "group": "Instrumentation", "pages": ["frameworks/overview", "frameworks/vercel", "frameworks/opentelemetry", "frameworks/other"] },
           { "group": "Concepts", "pages": ["concepts"] },
-          { "group": "Guides", "pages": ["guides/feedback", "guides/coding-agents"] }
+          { "group": "Guides", "pages": ["guides/feedback", "guides/datasets", "guides/coding-agents"] }
         ]
       },
       {

@@ -114,7 +114,7 @@ With write enabled, an agent builds a fine-tune set without leaving the editor. 
 add_pricing run from the last 30 days to it, and inspect the result."
 ```
 
-That maps to `bryel_create_dataset` → `bryel_add_from_query` (e.g. `intent = 'add_pricing' and status = 'ok'`) → `bryel_inspect_dataset`. Adding from a query is idempotent per trace, so you can widen the filter and re-run without duplicating.
+That maps to `bryel_create_dataset` → `bryel_add_from_query` (e.g. `intent = 'add_pricing' and status = 'ok'`) → `bryel_inspect_dataset`. Adding from a query is idempotent per trace, so you can widen the filter and re-run without duplicating. See [Datasets](/guides/datasets) for the full curation and export flow.
 
 To add records from outside bryel instead, `bryel_add_records` takes the chat-with-tools shape directly:
 
