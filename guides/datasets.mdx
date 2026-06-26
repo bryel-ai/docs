@@ -60,7 +60,7 @@ Export a dataset to fine-tune **JSONL** — one `{messages, tools}` object per l
 
 <Steps>
   <Step title="Export JSONL">
-    From the dataset, choose **Export JSONL**. bryel streams the records to a file you can download.
+    From the dataset, choose **Export JSONL** — bryel streams the records to a file you can download. A [coding agent](/guides/coding-agents) can do the same with `bryel_export_dataset`, then poll `bryel_export_status` for the download URL.
   </Step>
   <Step title="Train">
     Feed the JSONL to your fine-tuning pipeline.

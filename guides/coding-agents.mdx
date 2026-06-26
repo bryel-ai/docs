@@ -41,7 +41,7 @@ bryel runs a remote MCP server so your coding agent can work with your own data:
 
 ## Tools
 
-Eight tools, scoped to the single project you picked at consent. The agent can never name another project.
+Ten tools, scoped to the single project you picked at consent. The agent can never name another project.
 
 ### Traces
 
@@ -57,6 +57,8 @@ Eight tools, scoped to the single project you picked at consent. The agent can n
 | --- | --- |
 | `bryel_list_datasets` | Lists this project's fine-tune (SFT) datasets with record counts. |
 | `bryel_inspect_dataset` | A full training-data quality report for one dataset (see below). |
+| `bryel_export_dataset` | Exports a dataset as fine-tune JSONL to bryel storage; returns a job to poll. |
+| `bryel_export_status` | Polls an export job; returns a download URL for the JSONL once it succeeds. |
 | `bryel_create_dataset` <sup>write</sup> | Creates a new empty dataset; returns its slug. |
 | `bryel_add_from_query` <sup>write</sup> | Curates real traces into a dataset — every trace matching a BQL filter becomes a record. |
 | `bryel_add_records` <sup>write</sup> | Appends records in the bryel fine-tune shape (`{messages, tools?}`). |
@@ -165,6 +167,11 @@ Datasets (SFT fine-tune sets):
   real runs: create_dataset -> add_from_query -> inspect_dataset.
 - `bryel_add_records` (write) — append external records as {messages, tools?};
   `input` is derived from the first user turn if omitted; ≤500 per call.
+- `bryel_export_dataset` — export a dataset as fine-tune JSONL to storage;
+  returns a jobId.
+- `bryel_export_status` — poll the jobId; returns a download URL once succeeded.
+  Build → inspect → export → train: create_dataset/add_from_query ->
+  inspect_dataset -> export_dataset -> export_status.
 
 Use traces to investigate error rates, cost/token outliers, expensive intents,
 repeated/looping tool calls, and slow runs. Use the dataset tools to judge a
