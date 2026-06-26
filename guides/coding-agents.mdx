@@ -1,11 +1,13 @@
 ---
-title: Query from your coding agent
-description: "Connect bryel to Claude Code, Cursor, or any MCP client and query your traces with BQL."
+title: Use bryel from your coding agent
+description: "Connect bryel to Claude Code, Cursor, or any MCP client — query your traces with BQL, inspect dataset quality, and build fine-tune datasets from your editor."
 ---
 
-bryel runs a remote **MCP server** so your coding agent can query your own trace
-data — runs, intents, tokens, cost, tool trajectories — with BQL, right from your
-editor. It's OAuth-gated and read-only.
+bryel runs a remote **MCP server** so your coding agent can work with your own
+data — query trace runs (intents, tokens, cost, tool trajectories) with BQL,
+inspect a fine-tune dataset's quality, and build datasets — right from your
+editor. It's OAuth-gated, scoped to one project, and **read-only by default**
+(writing is opt-in at consent).
 
 ## Connect
 
@@ -33,25 +35,43 @@ editor. It's OAuth-gated and read-only.
   </Step>
   <Step title="Authorize">
     The first time your agent uses it, a browser opens — sign in to bryel and
-    **pick the project** the agent may query. That project is bound to the
+    **pick the project** the agent may use. That project is bound to the
     connection; it's the only one this agent can ever see.
+
+    Leave **Allow write** off for read-only access (query + inspect). Turn it on
+    only if you want the agent to **create datasets and add records**.
   </Step>
   <Step title="Ask away">
-    Your agent now has three tools. Try:
+    Try:
     _"Using bryel, how many traces errored in the last 7 days, and which intents cost the most?"_
+    or _"Inspect my `good-berlin-runs` dataset — is it balanced enough to fine-tune on?"_
   </Step>
 </Steps>
 
 ## Tools
 
+Seven tools, scoped to the single project you picked at consent — the agent can
+never name another project.
+
+#### Traces
+
 | Tool | What it does |
 | --- | --- |
-| `bryel_schema` | Lists the queryable fields, types and operators, plus your project's **live** intent labels and model names. Call this first. |
-| `bryel_validate` | Checks a BQL filter for errors (with did-you-mean suggestions) **without running it**. |
-| `bryel_query` | Runs a BQL filter and returns the match count + a sample (model, status, tokens, cost, steps, tools, truncated input). |
+| `bryel_get_schema` | Lists the queryable fields, types and operators, plus your project's **live** intent labels and model names. Call this first. |
+| `bryel_validate_query` | Checks a BQL filter for errors (with did-you-mean suggestions) **without running it**. |
+| `bryel_query_traces` | Runs a BQL filter and returns the match count + a sample (model, status, tokens, cost, steps, tools, truncated input). |
 
-Everything is **read-only** and scoped to the single project you picked at
-consent — the agent can't name another project.
+#### Datasets
+
+| Tool | What it does |
+| --- | --- |
+| `bryel_list_datasets` | Lists this project's fine-tune (SFT) datasets with record counts. |
+| `bryel_inspect_dataset` | A full training-data quality report for one dataset (see below). |
+| `bryel_create_dataset` <sup>write</sup> | Creates a new empty dataset; returns its slug. |
+| `bryel_add_records` <sup>write</sup> | Appends records in the bryel fine-tune shape (`{messages, tools?}`). |
+
+The two **write** tools require that you enabled *Allow write* at consent;
+otherwise they return a clear "read-only" error telling you to reconnect.
 
 ## BQL in 30 seconds
 
@@ -65,8 +85,51 @@ tool_count >= 10 and repeated_calls > 0
 model = 'anthropic/claude-opus-4-7'
 ```
 
-Call `bryel_schema` to see every field, operator, and your project's actual
+Call `bryel_get_schema` to see every field, operator, and your project's actual
 intent labels + model names.
+
+## Inspecting dataset quality
+
+`bryel_inspect_dataset` returns the same metrics bryel uses to judge whether a
+dataset will train a good model — so your agent can curate before you export:
+
+- **intents** — distribution per intent, top share, and an `imbalanced` flag
+  (one intent dominating → the fine-tune overfits it).
+- **redundancy** — unique vs duplicate inputs and the largest duplicate
+  clusters (near-identical records waste capacity).
+- **trajectoryHealth** — clean vs `looping` / `errored` trajectories, overall
+  and per intent (errored/looping runs teach the model bad behavior).
+- **length** — token and step distributions, with a count of records at risk of
+  truncating at the fine-tune context limit.
+- **modelMix** — which source models the records came from.
+
+```
+"Using bryel, list my datasets, inspect the largest one, and tell me what to
+fix before fine-tuning."
+```
+
+## Building a dataset
+
+With write enabled, an agent can assemble a fine-tune set without leaving the
+editor. Records use the bryel shape — a chat-with-tools trajectory per record:
+
+```json
+{
+  "messages": [
+    { "role": "user", "content": "Add a pricing section to the landing page." },
+    { "role": "assistant", "content": null, "tool_calls": [ /* ... */ ] },
+    { "role": "tool", "tool_call_id": "…", "content": "…" }
+  ],
+  "tools": [ /* the tool schemas referenced above (optional) */ ]
+}
+```
+
+`input` (the readable prompt) is derived from the first user message when you
+omit it. Add up to 500 records per `bryel_add_records` call.
+
+```
+"Create a bryel dataset 'good-berlin-runs', then add these trajectories to it."
+```
 
 ## Give your agent the playbook
 
@@ -74,28 +137,38 @@ Paste this into your `AGENTS.md` / `CLAUDE.md` (or `.cursorrules`) so the agent
 uses bryel well:
 
 ````markdown
-## Querying bryel (observability)
+## Using bryel (observability + fine-tune datasets)
 
-You have bryel MCP tools to query THIS project's LLM/agent traces:
+You have bryel MCP tools, scoped to ONE project. Read-only unless write was
+granted at consent.
 
-- `bryel_schema` — call FIRST to learn the fields, operators, and the project's
+Traces (BQL — a filter expression; single-quoted strings; and / or / not):
+- `bryel_get_schema` — call FIRST to learn fields, operators, and the project's
   real intent labels + model names.
-- `bryel_validate` — check a BQL filter before running it.
-- `bryel_query` — run a BQL filter; returns a match count + sample rows.
+- `bryel_validate_query` — check a BQL filter before running it.
+- `bryel_query_traces` — run a BQL filter; returns a match count + sample rows.
+  e.g.  status = 'error'
+        intent = 'add_pricing' and cost_usd > 0.5
+        tool_count >= 10 and repeated_calls > 0
 
-BQL is a filter expression (single-quoted strings; combine with and / or / not):
-  status = 'error'
-  intent = 'add_pricing' and cost_usd > 0.5
-  tool_count >= 10 and repeated_calls > 0
+Datasets (SFT fine-tune sets):
+- `bryel_list_datasets` — list datasets + record counts.
+- `bryel_inspect_dataset` — quality report: intent balance/imbalance,
+  redundancy + duplicate clusters, trajectory health (looping/errored), token &
+  step length (+ truncation risk), model mix.
+- `bryel_create_dataset` (write) — make a new empty dataset; returns its slug.
+- `bryel_add_records` (write) — append records as {messages, tools?}; `input`
+  is derived from the first user turn if omitted; ≤500 per call.
 
-Use it to investigate error rates, cost/token outliers, which intents are
-expensive, repeated/looping tool calls, and slow runs. Always ground on
-`bryel_schema` before writing a query, and `bryel_validate` if unsure.
+Use traces to investigate error rates, cost/token outliers, expensive intents,
+repeated/looping tool calls, and slow runs. Use the dataset tools to judge a
+fine-tune set's quality (balance, dedup, health, length) and to build one.
+Always ground on `bryel_get_schema` before writing a query.
 ````
 
 <Note>
-  One connection = one project (chosen at consent), read-only. To query a
-  different project, add a second MCP connection and pick that project. Removing
-  the connection (or losing access to the project) cuts off the agent
-  immediately.
+  One connection = one project (chosen at consent). It's read-only unless you
+  turned on **Allow write**. To use a different project — or to change the
+  read/write choice — reconnect and re-consent. Removing the connection (or
+  losing access to the project) cuts off the agent immediately.
 </Note>
