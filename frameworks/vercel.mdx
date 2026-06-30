@@ -9,9 +9,20 @@ description: "Trace the Vercel AI SDK with one span processor and a per-call fla
   <Step title="Install">
     Add the bryel processor and the Vercel OTel package.
 
-    ```bash
+    <CodeGroup>
+    ```bash bun
+    bun add @bryel/vercel @vercel/otel
+    ```
+    ```bash npm
     npm i @bryel/vercel @vercel/otel
     ```
+    ```bash pnpm
+    pnpm add @bryel/vercel @vercel/otel
+    ```
+    ```bash yarn
+    yarn add @bryel/vercel @vercel/otel
+    ```
+    </CodeGroup>
   </Step>
 
   <Step title="Register the processor once">

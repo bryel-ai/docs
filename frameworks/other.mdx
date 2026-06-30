@@ -10,19 +10,18 @@ bryel is OpenTelemetry-native: anything that emits OpenTelemetry GenAI spans shi
 The Vercel AI SDK wraps OpenAI, Anthropic, Google, and dozens of other providers behind one interface, and bryel ships a first-class adapter for it. If you can call your model through the AI SDK, it's the least-effort path: models, tokens, cost, and the full tool trajectory, out of the box.
 
 <CodeGroup>
-
+```bash bun
+bun add @bryel/vercel @vercel/otel
+```
 ```bash npm
 npm i @bryel/vercel @vercel/otel
 ```
-
 ```bash pnpm
 pnpm add @bryel/vercel @vercel/otel
 ```
-
 ```bash yarn
 yarn add @bryel/vercel @vercel/otel
 ```
-
 </CodeGroup>
 
 <Card title="Vercel AI SDK" icon="triangle" href="/frameworks/vercel">

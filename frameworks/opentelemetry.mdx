@@ -9,9 +9,20 @@ bryel is OpenTelemetry-native. If your app already emits [OpenInference](/concep
   <Step title="Install">
     Add the SDK alongside your existing OpenTelemetry packages.
 
-    ```bash
+    <CodeGroup>
+    ```bash bun
+    bun add @bryel/sdk-core @opentelemetry/sdk-trace-base
+    ```
+    ```bash npm
     npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
     ```
+    ```bash pnpm
+    pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
+    ```
+    ```bash yarn
+    yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
+    ```
+    </CodeGroup>
   </Step>
 
   <Step title="Register the processor">

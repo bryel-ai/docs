@@ -20,11 +20,17 @@ Install the entry package for your stack. Each one layers on top of `@bryel/sdk-
 ## Install
 
 <CodeGroup>
+```bash bun
+bun add @bryel/sdk-core @opentelemetry/sdk-trace-base   # any OTel app
+bun add @bryel/vercel @vercel/otel                      # + Vercel AI SDK (server)
+bun add @bryel/browser                                  # + AI SDK in the browser
+bun add @bryel/feedback                                 # user feedback
+```
 ```bash npm
-npm i @bryel/sdk-core @opentelemetry/sdk-trace-base   # any OTel app
-npm i @bryel/vercel @vercel/otel                      # + Vercel AI SDK (server)
-npm i @bryel/browser                                  # + AI SDK in the browser
-npm i @bryel/feedback                                 # user feedback
+npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
+npm i @bryel/vercel @vercel/otel
+npm i @bryel/browser
+npm i @bryel/feedback
 ```
 ```bash pnpm
 pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
@@ -37,11 +43,6 @@ yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
 yarn add @bryel/vercel @vercel/otel
 yarn add @bryel/browser
 yarn add @bryel/feedback
-```
-```bash bun
-bun add @bryel/sdk-core @opentelemetry/sdk-trace-base
-bun add @bryel/vercel @vercel/otel
-bun add @bryel/feedback
 ```
 </CodeGroup>
 

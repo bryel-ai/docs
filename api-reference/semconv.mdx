@@ -5,9 +5,20 @@ description: "OpenInference semantic-convention constants plus bryel extensions,
 
 OpenInference-conformant semantic-convention constants, with zero runtime dependencies. Install it directly only when you write a custom [`SpanMapper`](/api-reference/sdk-core#spanmapper).
 
-```bash
+<CodeGroup>
+```bash bun
+bun add @bryel/semconv
+```
+```bash npm
 npm i @bryel/semconv
 ```
+```bash pnpm
+pnpm add @bryel/semconv
+```
+```bash yarn
+yarn add @bryel/semconv
+```
+</CodeGroup>
 
 Each export is a frozen object of string constants paired with a matching TypeScript type. Use them as attribute keys when building a mapper.
 
