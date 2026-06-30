@@ -3,7 +3,7 @@ title: "@bryel/vercel"
 description: "Vercel AI SDK adapter that maps OpenTelemetry spans to OpenInference and ships them to bryel."
 ---
 
-The Vercel AI SDK adapter. It maps the AI SDK's OpenTelemetry spans into OpenInference and ships them to bryel. For end-to-end setup, see the [Vercel guide](/frameworks/vercel).
+API reference for the adapter's exports and options. For end-to-end setup, see the [Vercel guide](/frameworks/vercel).
 
 ## Install
 
@@ -39,7 +39,7 @@ export function register() {
   Project API key (`bk_…`). Resolves to your project and tenant server-side.
 </ParamField>
 
-<ParamField path="endpoint" type="string" default="https://ingest.bryel.ai/v1/traces">
+<ParamField path="endpoint" type="string" default="https://ingest.eu.bryel.ai/v1/traces">
   OTLP/HTTP traces endpoint. Override for self-hosting.
 </ParamField>
 
