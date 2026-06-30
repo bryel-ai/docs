@@ -12,7 +12,8 @@ Install the entry package for your stack. Each one layers on top of `@bryel/sdk-
 | Package | What it does | Reference |
 | --- | --- | --- |
 | `@bryel/sdk-core` | Base instrumentation for any OpenTelemetry app. | [sdk-core](/api-reference/sdk-core) |
-| `@bryel/vercel` | Capture spans from the Vercel AI SDK. | [vercel](/api-reference/vercel) |
+| `@bryel/vercel` | Capture spans from the Vercel AI SDK (server-side). | [vercel](/api-reference/vercel) |
+| `@bryel/browser` | Trace AI-SDK calls that run in the browser. | [browser](/api-reference/browser) |
 | `@bryel/feedback` | Record user feedback (👍/👎) on agent output. | [feedback](/api-reference/feedback) |
 | `@bryel/semconv` | Semantic convention constants for span attributes. | [semconv](/api-reference/semconv) |
 
@@ -21,17 +22,20 @@ Install the entry package for your stack. Each one layers on top of `@bryel/sdk-
 <CodeGroup>
 ```bash npm
 npm i @bryel/sdk-core @opentelemetry/sdk-trace-base   # any OTel app
-npm i @bryel/vercel @vercel/otel                      # + Vercel AI SDK
+npm i @bryel/vercel @vercel/otel                      # + Vercel AI SDK (server)
+npm i @bryel/browser                                  # + AI SDK in the browser
 npm i @bryel/feedback                                 # user feedback
 ```
 ```bash pnpm
 pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
 pnpm add @bryel/vercel @vercel/otel
+pnpm add @bryel/browser
 pnpm add @bryel/feedback
 ```
 ```bash yarn
 yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
 yarn add @bryel/vercel @vercel/otel
+yarn add @bryel/browser
 yarn add @bryel/feedback
 ```
 ```bash bun

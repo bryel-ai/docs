@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "bryel",
-  "description": "LLM & agent observability — OpenTelemetry-native tracing for any framework.",
+  "description": "LLM & agent observability \u2014 OpenTelemetry-native tracing for any framework.",
   "colors": {
     "primary": "#8c90d9",
     "light": "#b8bce9",
@@ -45,23 +45,69 @@
       {
         "tab": "Documentation",
         "groups": [
-          { "group": "Get started", "pages": ["introduction", "quickstart", "installation"] },
-          { "group": "Instrumentation", "pages": ["frameworks/overview", "frameworks/vercel", "frameworks/opentelemetry", "frameworks/other"] },
-          { "group": "Concepts", "pages": ["concepts"] },
-          { "group": "Guides", "pages": ["guides/feedback", "guides/datasets", "guides/coding-agents"] }
+          {
+            "group": "Get started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Instrumentation",
+            "pages": [
+              "frameworks/overview",
+              "frameworks/vercel",
+              "frameworks/browser",
+              "frameworks/opentelemetry",
+              "frameworks/other"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/feedback",
+              "guides/datasets",
+              "guides/coding-agents"
+            ]
+          }
         ]
       },
       {
         "tab": "SDK reference",
         "groups": [
-          { "group": "Packages", "pages": ["api-reference/sdk-core", "api-reference/vercel", "api-reference/feedback", "api-reference/semconv"] }
+          {
+            "group": "Packages",
+            "pages": [
+              "api-reference/sdk-core",
+              "api-reference/vercel",
+              "api-reference/browser",
+              "api-reference/feedback",
+              "api-reference/semconv"
+            ]
+          }
         ]
       }
     ]
   },
   "navbar": {
-    "links": [{ "label": "GitHub", "href": "https://github.com/bryel-ai" }],
-    "primary": { "type": "button", "label": "Dashboard", "href": "https://bryel.ai" }
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/bryel-ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://bryel.ai"
+    }
   },
   "footer": {
     "socials": {
