@@ -1,0 +1,150 @@
+---
+title: TypeScript
+description: "Trace a Node/TypeScript LLM app — the Vercel AI SDK, any OpenTelemetry app, or a provider SDK directly."
+---
+
+bryel is OpenTelemetry-native. On the server you have three ways in, all shipping
+the same OpenInference traces — models, tokens, cost, tool calls, full trajectory.
+
+<CardGroup cols={3}>
+  <Card title="Vercel AI SDK" icon="triangle" href="#vercel-ai-sdk">One processor + a per-call flag.</Card>
+  <Card title="Any OTel app" icon="radio" href="#any-opentelemetry-app">Ship spans you already emit.</Card>
+  <Card title="Provider SDKs" icon="boxes" href="#provider-sdks">OpenAI / Anthropic / LangChain.</Card>
+</CardGroup>
+
+## Vercel AI SDK
+
+`@bryel/vercel` maps the AI SDK's OpenTelemetry spans into OpenInference and ships
+them to bryel. You never wrap your model calls.
+
+<Steps>
+  <Step title="Install">
+    <CodeGroup>
+    ```bash bun
+    bun add @bryel/vercel @vercel/otel
+    ```
+    ```bash npm
+    npm i @bryel/vercel @vercel/otel
+    ```
+    ```bash pnpm
+    pnpm add @bryel/vercel @vercel/otel
+    ```
+    ```bash yarn
+    yarn add @bryel/vercel @vercel/otel
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Register the processor once">
+    In `instrumentation.ts` — Next.js calls this on startup.
+
+    ```ts instrumentation.ts
+    import { registerOTel } from "@vercel/otel";
+    import { bryelVercelProcessor } from "@bryel/vercel";
+
+    export function register() {
+      registerOTel({
+        serviceName: "my-app",
+        spanProcessors: [bryelVercelProcessor({ apiKey: process.env.BRYEL_KEY! })],
+      });
+    }
+    ```
+  </Step>
+
+  <Step title="Enable telemetry per call">
+    ```ts
+    const result = streamText({
+      model: openai("gpt-5"),
+      prompt,
+      experimental_telemetry: {
+        isEnabled: true,
+        metadata: { sessionId, userId },
+      },
+    });
+    ```
+  </Step>
+</Steps>
+
+<Warning>A streamed span finalizes only once the stream is fully consumed — always drain it.</Warning>
+
+## Any OpenTelemetry app
+
+If your app already emits [OpenInference](/concepts) spans, add
+`bryelSpanProcessor` to your provider — no mapping.
+
+<CodeGroup>
+```bash bun
+bun add @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+```bash npm
+npm i @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+```bash pnpm
+pnpm add @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+```bash yarn
+yarn add @bryel/sdk-core @opentelemetry/sdk-trace-base
+```
+</CodeGroup>
+
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { bryelSpanProcessor } from "@bryel/sdk-core";
+
+new NodeSDK({
+  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+}).start();
+```
+
+If your spans aren't OpenInference yet, supply a `SpanMapper` (this is exactly
+what `@bryel/vercel` does):
+
+```ts
+import { buildSpanProcessor, type SpanMapper } from "@bryel/sdk-core";
+
+const mapper: SpanMapper = {
+  name: "my-framework",
+  shouldMap: (span) => span.name.startsWith("my."),
+  map: (span) => ({ /* OpenInference attributes to merge */ }),
+};
+
+const processor = buildSpanProcessor(mapper, { apiKey: process.env.BRYEL_KEY });
+```
+
+## Provider SDKs
+
+Calling OpenAI / Anthropic / LangChain directly? Add any OpenTelemetry
+instrumentation that emits GenAI spans, then ship them with `bryelSpanProcessor`
+— no call-site changes:
+
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { bryelSpanProcessor } from "@bryel/sdk-core";
+// + the OpenTelemetry instrumentation for your provider SDK
+
+new NodeSDK({
+  instrumentations: [/* your GenAI instrumentation */],
+  spanProcessors: [bryelSpanProcessor({ apiKey: process.env.BRYEL_KEY })],
+}).start();
+```
+
+## Grouping and feedback
+
+The `metadata` you pass groups and joins your data:
+
+<ParamField path="sessionId" type="string">Groups turns into one conversation.</ParamField>
+<ParamField path="userId" type="string">The end user behind the run.</ParamField>
+<ParamField path="messageId" type="string">
+  A per-turn id **you mint** (`crypto.randomUUID()`). bryel stamps it as
+  `bryel.interaction.id` so [feedback](/guides/feedback) joins back to the turn.
+</ParamField>
+
+## API
+
+<ParamField path="apiKey" type="string" required>Project API key (`bk_…`).</ParamField>
+<ParamField path="endpoint" type="string" default="https://ingest.eu.bryel.ai/v1/traces">OTLP/HTTP endpoint. Override for self-hosting.</ParamField>
+<ParamField path="headers" type="Record<string, string>">Extra headers, merged after auth.</ParamField>
+
+`bryelVercelProcessor` (AI SDK, with mapping), `bryelSpanProcessor` (no mapping),
+and `buildSpanProcessor(mapper, options)` (custom mapping) all take these options
+and return an OTel `SpanProcessor`.

@@ -1,0 +1,71 @@
+---
+title: HTTP API
+description: "Send traces to bryel from any language over OTLP/HTTP — no bryel SDK required."
+---
+
+bryel's ingest is a standard **OTLP/HTTP** endpoint. Any OpenTelemetry SDK (Go,
+Rust, Java, Ruby, …) or a raw HTTP client can send to it — point your OTLP
+exporter at the bryel endpoint with your API key on the `Authorization` header.
+
+| | |
+| --- | --- |
+| **Endpoint** | `POST https://ingest.eu.bryel.ai/v1/traces` |
+| **Auth** | `Authorization: Bearer bk_…` |
+| **Body** | OTLP protobuf (`application/x-protobuf`) or OTLP JSON (`application/json`) |
+
+The receiver stamps your tenant and project from the API key — you never send
+them. bryel normalizes both the OpenInference (`llm.*`) and OpenTelemetry GenAI
+(`gen_ai.*`) conventions, so send whichever your instrumentation emits.
+
+## Any OpenTelemetry SDK (no code)
+
+Every OTel SDK reads standard env vars. Point the OTLP/HTTP exporter at bryel:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://ingest.eu.bryel.ai/v1/traces"
+export OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Bearer bk_…"
+export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL="http/protobuf"
+```
+
+Instrument your app with any OpenTelemetry GenAI/OpenInference instrumentation for
+your language and the spans flow to bryel — no bryel-specific code.
+
+## Raw request
+
+If you're emitting OTLP yourself, POST an `ExportTraceServiceRequest`:
+
+```bash
+curl -X POST https://ingest.eu.bryel.ai/v1/traces \
+  -H "Authorization: Bearer bk_…" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": { "attributes": [{ "key": "service.name", "value": { "stringValue": "my-app" } }] },
+      "scopeSpans": [{
+        "scope": { "name": "my-agent" },
+        "spans": [{
+          "traceId": "5b8efff798038103d269b633813fc60c",
+          "spanId": "eee19b7ec3c1b174",
+          "name": "chat",
+          "kind": 1,
+          "startTimeUnixNano": "1735650000000000000",
+          "endTimeUnixNano": "1735650001000000000",
+          "attributes": [
+            { "key": "llm.model_name", "value": { "stringValue": "gpt-4o-mini" } },
+            { "key": "llm.token_count.total", "value": { "intValue": "52" } }
+          ],
+          "status": { "code": 1 }
+        }]
+      }]
+    }]
+  }'
+```
+
+A `200 {"accepted": 1}` means the span landed. Trace and span ids are
+hex-encoded strings per the OTLP/JSON spec.
+
+## Feedback
+
+Record 👍/👎, scores, and corrections against a run the same way — `POST
+https://ingest.eu.bryel.ai/v1/feedback` with the Bearer key. See
+[Feedback](/guides/feedback).

@@ -46,21 +46,19 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Get started",
+            "group": "Getting started",
             "pages": [
               "introduction",
-              "quickstart",
-              "installation"
+              "quickstart"
             ]
           },
           {
-            "group": "Instrumentation",
+            "group": "SDK",
             "pages": [
-              "frameworks/overview",
-              "frameworks/vercel",
-              "frameworks/browser",
-              "frameworks/opentelemetry",
-              "frameworks/other"
+              "sdk/typescript",
+              "sdk/python",
+              "sdk/browser",
+              "sdk/http"
             ]
           },
           {
@@ -75,21 +73,6 @@
               "guides/feedback",
               "guides/datasets",
               "guides/coding-agents"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "SDK reference",
-        "groups": [
-          {
-            "group": "Packages",
-            "pages": [
-              "api-reference/sdk-core",
-              "api-reference/vercel",
-              "api-reference/browser",
-              "api-reference/feedback",
-              "api-reference/semconv"
             ]
           }
         ]
@@ -114,5 +97,51 @@
       "github": "https://github.com/bryel-ai",
       "x": "https://x.com/bryel_ai"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/installation",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/frameworks/overview",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/frameworks/vercel",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/frameworks/opentelemetry",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/frameworks/other",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/frameworks/browser",
+      "destination": "/sdk/browser"
+    },
+    {
+      "source": "/api-reference/sdk-core",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/api-reference/vercel",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/api-reference/semconv",
+      "destination": "/sdk/typescript"
+    },
+    {
+      "source": "/api-reference/browser",
+      "destination": "/sdk/browser"
+    },
+    {
+      "source": "/api-reference/feedback",
+      "destination": "/guides/feedback"
+    }
+  ]
 }

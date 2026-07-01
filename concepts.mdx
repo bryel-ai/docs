@@ -29,7 +29,7 @@ These telemetry keys connect runs into conversations and tie feedback back to a 
 
 ## Span kinds
 
-Every span carries an OpenInference span kind (`openinference.span.kind`) so bryel knows what it is. The adapters set this for you; a custom [`SpanMapper`](/api-reference/sdk-core#spanmapper) sets it from [`OpenInferenceSpanKind`](/api-reference/semconv).
+Every span carries an OpenInference span kind (`openinference.span.kind`) so bryel knows what it is. The adapters set this for you; a custom [`SpanMapper`](/sdk/typescript) sets it from [`OpenInferenceSpanKind`](/sdk/typescript).
 
 | Kind | What it represents |
 | --- | --- |
@@ -47,5 +47,5 @@ Token counts live on the leaf model spans (the actual provider request); the out
 Pricing is recorded as `bryel.cost.usd` with a `bryel.cost.status` (`provider_reported`, `priced`, `unknown_model`, or `no_tokens`), so you always know whether a number is exact, estimated, or unavailable.
 
 <Note>
-  Span kinds and the `bryel.*` attributes are defined in [`@bryel/semconv`](/api-reference/semconv).
+  Span kinds and the `bryel.*` attributes are defined in [`@bryel/semconv`](/sdk/typescript).
 </Note>

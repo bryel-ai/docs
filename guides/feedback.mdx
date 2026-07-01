@@ -40,7 +40,7 @@ await recordFeedback({
 await thumbsUp({ apiKey, target: { type: "message", id: messageId } });
 ```
 
-See the [feedback API reference](/api-reference/feedback) for every field and shorthand.
+See the [feedback API reference](/guides/feedback) for every field and shorthand.
 
 ## The messageId handshake
 
@@ -66,4 +66,4 @@ Feedback arrives _after_ the answer, so the client needs a handle that also exis
 
 <Warning>Keep your API key server-side. Proxy browser clicks through your backend — never ship `BRYEL_KEY` to the client.</Warning>
 
-To capture the `messageId` upstream in the first place, see the [Vercel instrumentation](/frameworks/vercel) guide.
+To capture the `messageId` upstream in the first place, see the [Vercel instrumentation](/sdk/typescript) guide.

@@ -1,0 +1,114 @@
+---
+title: Python
+description: "Trace a Python LLM app or agent — one call, then any OpenInference instrumentor."
+---
+
+`bryel` ships your model calls, tool calls, tokens, and cost to bryel as
+OpenInference traces. One call configures OpenTelemetry; then any
+[OpenInference instrumentor](https://github.com/Arize-ai/openinference) flows
+through — bryel adds no mapping, it's just the exporter.
+
+<Steps>
+  <Step title="Install">
+    <CodeGroup>
+    ```bash uv
+    uv add bryel
+    ```
+    ```bash pip
+    pip install bryel
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Initialize">
+    ```python
+    import bryel
+    bryel.init(api_key="bk_…", service_name="my-app")
+    ```
+    Or read the key from the environment (`BRYEL_KEY`) and omit `api_key`.
+  </Step>
+
+  <Step title="Instrument your stack">
+    Add the OpenInference instrumentor for your library:
+
+    <CodeGroup>
+    ```python OpenAI
+    from openinference.instrumentation.openai import OpenAIInstrumentor
+    OpenAIInstrumentor().instrument()
+    ```
+    ```python Anthropic
+    from openinference.instrumentation.anthropic import AnthropicInstrumentor
+    AnthropicInstrumentor().instrument()
+    ```
+    ```python LangChain
+    from openinference.instrumentation.langchain import LangChainInstrumentor
+    LangChainInstrumentor().instrument()
+    ```
+    ```python LlamaIndex
+    from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+    LlamaIndexInstrumentor().instrument()
+    ```
+    </CodeGroup>
+
+    …or let bryel wire up every instrumentor you have installed:
+
+    ```python
+    bryel.init(api_key="bk_…", instrument=True)
+    ```
+  </Step>
+
+  <Step title="Verify">
+    Run a model call, then open the trace explorer — model, tokens, cost, and
+    tool calls appear.
+  </Step>
+</Steps>
+
+## Full example
+
+```python
+import bryel
+bryel.init(service_name="support-agent", instrument=True)  # reads BRYEL_KEY
+
+from openai import OpenAI
+OpenAI().chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "hello"}],
+)
+
+bryel.shutdown()  # flush pending spans before exit
+```
+
+## Grouping and feedback
+
+Stamp `session.id`, `user.id`, and a `bryel.interaction.id` you mint onto your
+spans to group turns into a conversation and join
+[feedback](/guides/feedback).
+
+<Note>
+  bryel sends OTLP/HTTP protobuf and needs no client-side mapping — the ingest
+  normalizes both the OpenInference (`llm.*`) and OpenTelemetry GenAI
+  (`gen_ai.*`) conventions.
+</Note>
+
+## API
+
+### `bryel.init(api_key=None, *, service_name=None, endpoint=None, headers=None, set_global=True, instrument=False)`
+
+Configures the exporter and returns the OpenTelemetry `TracerProvider`.
+
+<ParamField path="api_key" type="str">Project API key (`bk_…`). Falls back to `$BRYEL_KEY`.</ParamField>
+<ParamField path="service_name" type="str">OpenTelemetry `service.name`.</ParamField>
+<ParamField path="endpoint" type="str" default="https://ingest.eu.bryel.ai/v1/traces">OTLP/HTTP URL. Override via `$BRYEL_INGEST_URL` for self-hosting.</ParamField>
+<ParamField path="headers" type="dict">Extra headers, merged after auth.</ParamField>
+<ParamField path="set_global" type="bool" default="True">Register as the global OpenTelemetry provider.</ParamField>
+<ParamField path="instrument" type="bool" default="False">Also auto-instrument installed OpenInference libraries.</ParamField>
+
+### `bryel.auto_instrument(tracer_provider=None) -> list[str]`
+
+Best-effort instrument every installed OpenInference library (OpenAI, Anthropic,
+LangChain, LlamaIndex, Bedrock, Groq, Mistral, VertexAI). Returns the ones it
+wired up; safe to call with none installed.
+
+### `bryel.shutdown()`
+
+Flush pending spans and shut down. Call on process exit.
