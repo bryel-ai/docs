@@ -1,0 +1,75 @@
+---
+title: Integrations
+description: "Every provider SDK, agent SDK, and framework bryel captures — and the one line that turns each on."
+---
+
+bryel is OpenTelemetry-native, so it traces any library that has an
+[OpenInference](https://github.com/Arize-ai/openinference) instrumentor. You
+don't map anything — install the instrumentor for your stack and bryel exports
+the spans.
+
+In **Python**, one call wires up every instrumentor you have installed:
+
+```python
+import bryel
+bryel.init(service_name="my-app", instrument=True)  # reads BRYEL_KEY
+```
+
+`instrument=True` scans for the libraries below and turns on the ones present.
+Prefer to be explicit? Call a single instrumentor yourself — the table shows how.
+
+<Note>In **TypeScript/JavaScript**, add any OpenTelemetry GenAI instrumentation to your `NodeSDK` and ship it with `bryelSpanProcessor` — see [TypeScript](/sdk/typescript#provider-sdks). Any other language can send over the [HTTP API](/sdk/http).</Note>
+
+## Provider SDKs
+
+| Provider | Package | Instrumentor |
+| --- | --- | --- |
+| OpenAI | `openinference-instrumentation-openai` | `OpenAIInstrumentor` |
+| Anthropic | `openinference-instrumentation-anthropic` | `AnthropicInstrumentor` |
+| Amazon Bedrock | `openinference-instrumentation-bedrock` | `BedrockInstrumentor` |
+| Google GenAI | `openinference-instrumentation-google-genai` | `GoogleGenAIInstrumentor` |
+| VertexAI | `openinference-instrumentation-vertexai` | `VertexAIInstrumentor` |
+| Groq | `openinference-instrumentation-groq` | `GroqInstrumentor` |
+| Mistral | `openinference-instrumentation-mistralai` | `MistralAIInstrumentor` |
+| LiteLLM | `openinference-instrumentation-litellm` | `LiteLLMInstrumentor` |
+| Instructor | `openinference-instrumentation-instructor` | `InstructorInstrumentor` |
+
+## Agent SDKs
+
+| SDK | Package | Instrumentor |
+| --- | --- | --- |
+| OpenAI Agents | `openinference-instrumentation-openai-agents` | `OpenAIAgentsInstrumentor` |
+| Google ADK | `openinference-instrumentation-google-adk` | `GoogleADKInstrumentor` |
+
+## Frameworks
+
+| Framework | Package | Instrumentor |
+| --- | --- | --- |
+| LangChain / LangGraph | `openinference-instrumentation-langchain` | `LangChainInstrumentor` |
+| LlamaIndex | `openinference-instrumentation-llama-index` | `LlamaIndexInstrumentor` |
+| CrewAI | `openinference-instrumentation-crewai` | `CrewAIInstrumentor` |
+| DSPy | `openinference-instrumentation-dspy` | `DSPyInstrumentor` |
+| Haystack | `openinference-instrumentation-haystack` | `HaystackInstrumentor` |
+| smolagents | `openinference-instrumentation-smolagents` | `SmolagentsInstrumentor` |
+| Agno | `openinference-instrumentation-agno` | `AgnoInstrumentor` |
+| AutoGen | `openinference-instrumentation-autogen` | `AutogenInstrumentor` |
+| Guardrails | `openinference-instrumentation-guardrails` | `GuardrailsInstrumentor` |
+| MCP (tool calls) | `openinference-instrumentation-mcp` | `MCPInstrumentor` |
+
+## Turning one on explicitly
+
+Install the instrumentor and call it after `bryel.init()`:
+
+```python
+import bryel
+bryel.init(service_name="research-agent")   # exporter only
+
+from openinference.instrumentation.crewai import CrewAIInstrumentor
+CrewAIInstrumentor().instrument()
+```
+
+That's the same thing `instrument=True` does — it just calls every instrumentor
+it finds. Use the explicit form when you want to trace one library and not the
+rest.
+
+<Tip>Don't see your framework? If it emits OpenTelemetry GenAI or OpenInference spans, bryel already accepts them — point your OTLP exporter at the [HTTP API](/sdk/http). If it doesn't, [tell us](https://docs.bryel.ai) and we'll add it.</Tip>

@@ -58,6 +58,7 @@
               "sdk/typescript",
               "sdk/python",
               "sdk/browser",
+              "sdk/integrations",
               "sdk/http"
             ]
           },

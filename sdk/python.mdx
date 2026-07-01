@@ -105,9 +105,9 @@ Configures the exporter and returns the OpenTelemetry `TracerProvider`.
 
 ### `bryel.auto_instrument(tracer_provider=None) -> list[str]`
 
-Best-effort instrument every installed OpenInference library (OpenAI, Anthropic,
-LangChain, LlamaIndex, Bedrock, Groq, Mistral, VertexAI). Returns the ones it
-wired up; safe to call with none installed.
+Best-effort instrument every installed OpenInference library — provider SDKs,
+agent SDKs, and frameworks (see [Integrations](/sdk/integrations) for the full
+list). Returns the ones it wired up; safe to call with none installed.
 
 ### `bryel.shutdown()`
 
