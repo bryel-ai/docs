@@ -54,7 +54,16 @@ Prefer to be explicit? Call a single instrumentor yourself — the table shows h
 | Agno | `openinference-instrumentation-agno` | `AgnoInstrumentor` |
 | AutoGen | `openinference-instrumentation-autogen` | `AutogenInstrumentor` |
 | Guardrails | `openinference-instrumentation-guardrails` | `GuardrailsInstrumentor` |
-| MCP (tool calls) | `openinference-instrumentation-mcp` | `MCPInstrumentor` |
+
+<Note>
+  Two special cases:
+  - **AutoGen** instruments the classic `ConversableAgent` API (the `ag2`
+    package), not the newer `autogen-agentchat` rewrite.
+  - **MCP** (`openinference-instrumentation-mcp` → `MCPInstrumentor`) propagates
+    trace context across the MCP client/server boundary so tool calls stay on
+    the same trace — it stitches spans rather than emitting model spans itself.
+    Add it alongside the instrumentor for whatever runs your model.
+</Note>
 
 ## Turning one on explicitly
 
